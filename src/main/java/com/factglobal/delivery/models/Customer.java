@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-//import com.factglobal.delivery.models.order;
 
 import java.util.List;
 
@@ -14,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Customer")
+@Table(name = "customer")
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,8 +27,8 @@ public class Customer {
     private String email;
     @Column(name = "password")
     private String password;
-    @Column(name = "repeat_password")
+    @Transient
     private String repeatPassword;
-//    @OneToMany(mappedBy = "customer")
-//    private List<Order> listOrders;
+    @OneToMany(mappedBy = "customer")
+    private List<Order> listOrders;
 }
