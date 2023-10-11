@@ -68,9 +68,11 @@ public class Order {
 
     @Column(name = "price")
     private double price;
-    //    @ManyToOne()
-//    @JoinColumn(name = "courier_id", referencedColumnName = "id")
-//    private Courier courier;
+
+    @ManyToOne()
+    @JoinColumn(name = "courier_id", referencedColumnName = "id")
+    private Courier courier;
+
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     private Customer customer;
