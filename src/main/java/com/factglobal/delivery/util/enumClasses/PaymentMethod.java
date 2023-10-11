@@ -1,4 +1,4 @@
-package com.factglobal.delivery.util;
+package com.factglobal.delivery.util.enumClasses;
 
 public enum PaymentMethod {
     CARD,
