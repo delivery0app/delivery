@@ -33,7 +33,7 @@ public class Customer {
     private String phoneNumber;
 
     @Email(message = "Email should be valid")
-    @NotEmpty
+    @NotEmpty(message = "Phone number should not be empty")
     @Column(name = "email")
     private String email;
 
