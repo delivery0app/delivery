@@ -27,12 +27,12 @@ public class Order {
     private int id;
 
     @NotBlank(message = "Address should not be empty")
-    @Size(min = 2, max = 50, message = "Address should be between 2 and 100 characters")
+    @Size(min = 2, max = 100, message = "Address should be between 2 and 100 characters")
     @Column(name = "sender_address")
     private String senderAddress;
 
     @NotBlank(message = "Address should not be empty")
-    @Size(min = 2, max = 50, message = "Address should be between 2 and 100 characters")
+    @Size(min = 2, max = 100, message = "Address should be between 2 and 100 characters")
     @Column(name = "delivery_address")
     private String deliveryAddress;
 
@@ -53,14 +53,12 @@ public class Order {
     @Column(name = "order_status")
     private OrderStatus orderStatus;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "delivery_date")
     private LocalDate deliveryDate;
 
     @Transient
     private int distance;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
 
