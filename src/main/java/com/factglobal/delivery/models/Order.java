@@ -44,7 +44,7 @@ public class Order {
 //    @ManyToMany()
 //    @JoinColumn(name = "courier_id", referencedColumnName = "id")
 //    private Courier courier;
-//    @ManyToMany()
-//    @JoinColumn(name = "customer_id", referencedColumnName = "id")
-//    private Customer customer;
+    @ManyToOne()
+    @JoinColumn(name = "customer_id", referencedColumnName = "id")
+    private Customer customer;
 }
