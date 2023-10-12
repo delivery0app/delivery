@@ -1,9 +1,6 @@
 package com.factglobal.delivery.models;
 
-import com.factglobal.delivery.util.enumClasses.OrderStatus;
-import com.factglobal.delivery.util.enumClasses.OrderStatusConverter;
-import com.factglobal.delivery.util.enumClasses.PaymentMethod;
-import com.factglobal.delivery.util.enumClasses.PaymentMethodConverter;
+import com.factglobal.delivery.util.common.OrderBPM;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -45,13 +42,13 @@ public class Order {
     private String description;
 
     @NotNull(message = "Payment method should not be empty")
-    @Convert(converter = PaymentMethodConverter.class)
     @Column(name = "payment_method")
-    private PaymentMethod paymentMethod;
+    @Enumerated(EnumType.STRING)
+    private OrderBPM.PaymentMethod paymentMethod;
 
-    @Convert(converter = OrderStatusConverter.class)
+    @Enumerated(EnumType.STRING)
     @Column(name = "order_status")
-    private OrderStatus orderStatus;
+    private OrderBPM.State orderStatus;
 
     @Column(name = "delivery_date")
     private LocalDate deliveryDate;

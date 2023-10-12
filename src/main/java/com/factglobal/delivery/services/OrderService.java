@@ -6,8 +6,9 @@ import com.factglobal.delivery.models.Order;
 import com.factglobal.delivery.repositories.CourierRepository;
 import com.factglobal.delivery.repositories.CustomerRepository;
 import com.factglobal.delivery.repositories.OrderRepository;
-import com.factglobal.delivery.util.enumClasses.OrderStatus;
+import com.factglobal.delivery.util.common.OrderBPM;
 import jakarta.transaction.Transactional;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -66,8 +67,8 @@ public class OrderService {
         return orderRepository.getOrdersByCustomer(customer);
     }
 
-    public List<Order> getOrdersByStatus(OrderStatus status) {
-        return orderRepository.getOrdersByOrderStatus(status);
+    public List<Order> getOrdersByStatus(OrderBPM.State orderStatus) {
+        return orderRepository.getOrdersByOrderStatus(orderStatus);
     }
 
     public Double calculateShippingCost(int distance, int weight, Boolean fragileCargo) {

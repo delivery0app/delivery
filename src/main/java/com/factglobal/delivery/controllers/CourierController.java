@@ -42,5 +42,4 @@ public class CourierController {
         courierService.deleteCourier(id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
-
 }
