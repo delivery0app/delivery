@@ -1,14 +1,10 @@
 package com.factglobal.delivery.services;
 
 import com.factglobal.delivery.models.Customer;
-import com.factglobal.delivery.models.Order;
 import com.factglobal.delivery.repositories.CustomerRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -25,26 +21,18 @@ public class CustomerService {
     }
 
     public Customer getCustomer(int id) {
-        Optional<Customer> customer = customerRepository.findById(id);
-        return customer.orElse(null);
+        return customerRepository.findById(id).orElse(null);
     }
 
     public void deleteCustomer(int id) {
         customerRepository.deleteById(id);
     }
 
-    public List<Order> getAllOrders() {
-        return null;
+    public Customer getCustomerByPhoneNumber(String phoneNumber) {
+        return customerRepository.findCustomerByPhoneNumber(phoneNumber).orElse(null);
     }
 
-    public List<Order> getAllOrdersCompleted() {
-        return null;
-    }
-
-    public Order getOrder(int customer_id, int order_id) {
-        return null;
-    }
-
-    public void cancelOrder() {
+    public Customer getCustomerByEmail(String email) {
+        return customerRepository.findCustomerByEmail(email).orElse(null);
     }
 }
