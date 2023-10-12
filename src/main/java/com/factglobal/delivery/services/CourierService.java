@@ -26,11 +26,21 @@ public class CourierService {
     }
 
     public void saveCourier(Courier courier) {
+        if (courier.getId() == 0)
+            enrichCourier(courier);
         courierRepository.save(courier);
     }
 
     public void deleteCourier(int id) {
         courierRepository.deleteById(id);
+    }
+
+    public List<Courier> getAllCourier() {
+        return courierRepository.findAll();
+    }
+
+    private void enrichCourier(Courier courier) {
+        courier.setCourierStatus(Courier.CourierStatus.FREE);
     }
 
 }
