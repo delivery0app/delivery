@@ -46,10 +46,18 @@ public class Courier {
             , message = "Password should contain at least one number, one lowercase and one uppercase letter, and be at least 8 characters long")
     private String password;
 
-    @Transient
-    private boolean busy;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "courier_status")
+    private CourierStatus courierStatus;
 
     @OneToMany(mappedBy = "courier")
     private List<Order> orders;
+
+    public enum CourierStatus {
+        FREE, BUSY
+    }
 }
+
+
+
 
