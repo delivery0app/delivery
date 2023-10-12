@@ -12,6 +12,8 @@ import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.crypto.Data;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -30,6 +32,21 @@ public class OrderService {
     }
 
     public void saveOrder(Order order) {
+        if (order.getId() == 0)
+            enrichOrder(order);
+        orderRepository.save(order);
+    }
+
+    public void saveOrderByCustomer(Order order, int customerId) {
+        order.setCustomer(customerRepository.findById(customerId).orElse(null));
+    }
+
+    public void cancelOrder(int id) {
+        Order order = getOrder(id);
+        if (order.getOrderStatus() == OrderBPM.State.NEW)
+            order.setOrderStatus(OrderBPM.State.CANCELED);
+        else
+            throw new RuntimeException();//TODO (This order is already in progress or delivered)
         orderRepository.save(order);
     }
 
@@ -45,10 +62,18 @@ public class OrderService {
         orderRepository.deleteById(id);
     }
 
-    public void assignCourierToOrder(Order order, int courierId) {
+    public void assignCourierToOrder(int orderId, int courierId) {
+        Order order = getOrder(orderId);
         Courier courier = courierRepository.findById(courierId).orElse(null);
-        order.setCourier(courier);
-        orderRepository.save(order);
+
+        if (courier != null && courier.getCourierStatus() == Courier.CourierStatus.FREE) {
+            order.setCourier(courier);
+            courier.setCourierStatus(Courier.CourierStatus.BUSY);
+            saveOrder(order);
+            courierRepository.save(courier);
+        }else
+            throw new RuntimeException();//TODO (This courier is already busy or this courier is not exist)
+
     }
 
     public void releaseCourierFromOrder(int orderId) {
@@ -71,7 +96,29 @@ public class OrderService {
         return orderRepository.getOrdersByOrderStatus(orderStatus);
     }
 
-    public Double calculateShippingCost(int distance, int weight, Boolean fragileCargo) {
-        return null;
+    public Double calculateShippingCost(Order order) {
+        double price = 0;
+        int weight = order.getWeight();
+        double coefficientWeigth = 1;
+
+        if (weight > 10) {
+            coefficientWeigth = 2;
+        } else if (weight <= 10 && weight >=5) {
+            coefficientWeigth = 1.5;
+        } else if (weight < 5 && weight > 2) {
+            coefficientWeigth = 1.3;
+        }
+
+        if (order.getFragileCargo())
+            price = order.getDistance() * 0.6 * 1.3 * coefficientWeigth;
+        else
+            price = order.getDistance() * 0.6 * coefficientWeigth;
+        return price;
+    }
+
+    private void enrichOrder(Order order) {
+        order.setOrderStatus(OrderBPM.State.NEW);
+        order.setPrice(calculateShippingCost(order));
+        order.setCreationDate(LocalDateTime.now());
     }
 }

@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/couriers")
 public class CourierController {
@@ -23,6 +25,11 @@ public class CourierController {
     @GetMapping("/{id}")
     public Courier getCourier(@PathVariable("id") int id) {
         return courierService.getCourier(id);
+    }
+
+    @GetMapping()
+    public List<Courier> getAllCourier() {
+        return courierService.getAllCourier();
     }
 
     @PostMapping()

@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/customers")
 public class CustomerController {
@@ -28,6 +30,11 @@ public class CustomerController {
         return customerService.getCustomer(id);
     }
 
+    @GetMapping()
+    public List<Customer> getAllCustomers() {
+        return customerService.getAllCustomers();
+    }
+
     @PutMapping
     public ResponseEntity<HttpStatus> editCustomer(@RequestBody Customer customer) {
         customerService.saveCustomer(customer);
@@ -35,7 +42,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> removeCustomer(@PathVariable("id") int id) {
+    public ResponseEntity<HttpStatus> deleteCustomer(@PathVariable("id") int id) {
         customerService.deleteCustomer(id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
