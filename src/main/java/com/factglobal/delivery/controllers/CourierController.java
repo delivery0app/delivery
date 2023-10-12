@@ -32,7 +32,7 @@ public class CourierController {
     }
 
     @PutMapping()
-    public ResponseEntity<HttpStatus> edit(@RequestBody Courier courier) {
+    public ResponseEntity<HttpStatus> editCourier(@RequestBody Courier courier) {
         courierService.saveCourier(courier);
         return ResponseEntity.ok(HttpStatus.OK);
     }

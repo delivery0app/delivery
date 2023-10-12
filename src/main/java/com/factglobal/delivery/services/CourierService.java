@@ -22,8 +22,7 @@ public class CourierService {
     }
 
     public Courier getCourier(int id) {
-        Optional<Courier> courier = courierRepository.findById(id);
-        return courier.orElse(null);
+        return courierRepository.findById(id).orElse(null);
     }
 
     public void saveCourier(Courier courier) {
