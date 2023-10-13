@@ -7,14 +7,15 @@ import com.factglobal.delivery.repositories.CourierRepository;
 import com.factglobal.delivery.repositories.CustomerRepository;
 import com.factglobal.delivery.repositories.OrderRepository;
 import com.factglobal.delivery.util.common.OrderBPM;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.xml.crypto.Data;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 
 @Service
@@ -51,11 +52,16 @@ public class OrderService {
     }
 
     public Order getOrder(int id) {
-        return orderRepository.findById(id).orElse(null);
+        Optional<Order> foundOrder = orderRepository.findById(id);
+        return foundOrder.orElseThrow(EntityNotFoundException::new);
     }
 
     public List<Order> getAllOrders() {
-        return orderRepository.findAll();
+        List<Order> orders = orderRepository.findAll();
+        if (orders.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        return orders;
     }
 
     public void deleteOrder(int id) {
@@ -71,7 +77,7 @@ public class OrderService {
             courier.setCourierStatus(Courier.CourierStatus.BUSY);
             saveOrder(order);
             courierRepository.save(courier);
-        }else
+        } else
             throw new RuntimeException();//TODO (This courier is already busy or this courier is not exist)
 
     }
@@ -84,16 +90,29 @@ public class OrderService {
 
     public List<Order> getOrdersByCourier(int courierId) {
         Courier courier = courierRepository.findById(courierId).orElse(null);
-        return orderRepository.getOrdersByCourier(courier);
+        List<Order> orders = orderRepository.findOrdersByCourier(courier);
+        if (orders.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        return orders;
     }
 
     public List<Order> getOrdersByCustomer(int customerId) {
         Customer customer = customerRepository.findById(customerId).orElse(null);
-        return orderRepository.getOrdersByCustomer(customer);
+        List<Order> orders = orderRepository.findOrdersByCustomer(customer);
+        if (orders.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        return orders;
     }
 
     public List<Order> getOrdersByStatus(OrderBPM.State orderStatus) {
-        return orderRepository.getOrdersByOrderStatus(orderStatus);
+
+        List<Order> orders = orderRepository.findOrdersByOrderStatus(orderStatus);
+        if (orders.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        return orders;
     }
 
     public Double calculateShippingCost(Order order) {
@@ -103,7 +122,7 @@ public class OrderService {
 
         if (weight > 10) {
             coefficientWeigth = 2;
-        } else if (weight <= 10 && weight >=5) {
+        } else if (weight <= 10 && weight >= 5) {
             coefficientWeigth = 1.5;
         } else if (weight < 5 && weight > 2) {
             coefficientWeigth = 1.3;

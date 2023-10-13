@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
-    List<Order> getOrdersByCourier(Courier courier);
-    List<Order> getOrdersByCustomer(Customer customer);
-    List<Order> getOrdersByOrderStatus(OrderBPM.State status);
+    List<Order> findOrdersByCourier(Courier courier);
+    List<Order> findOrdersByCustomer(Customer customer);
+    List<Order> findOrdersByOrderStatus(OrderBPM.State status);
 }
