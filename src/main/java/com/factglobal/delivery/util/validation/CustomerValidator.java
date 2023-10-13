@@ -1,4 +1,4 @@
-package com.factglobal.delivery.util.common.validation;
+package com.factglobal.delivery.util.validation;
 
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.services.CustomerService;
