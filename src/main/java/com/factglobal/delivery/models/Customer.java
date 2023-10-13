@@ -1,5 +1,6 @@
 package com.factglobal.delivery.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -42,6 +43,7 @@ public class Customer {
             , message = "Password should contain at least one number, one lowercase and one uppercase letter, and be at least 8 characters long")
     private String password;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "customer")
     private List<Order> orders;
 }
