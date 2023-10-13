@@ -1,16 +1,12 @@
-package com.factglobal.delivery.models;
-
+import com.factglobal.delivery.models.Order;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
-@Getter
+import java.util.List;Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -42,6 +38,7 @@ public class Customer {
     @Pattern(regexp = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z!@#$%^&*]{8,}"
             , message = "Password should contain at least one number, one lowercase and one uppercase letter, and be at least 8 characters long")
     private String password;
+
     @JsonIgnore
     @OneToMany(mappedBy = "customer")
     private List<Order> orders;
