@@ -4,6 +4,7 @@ package com.factglobal.delivery.services;
 import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.repositories.CourierRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,8 @@ public class CourierService {
     }
 
     public Courier getCourier(int id) {
-        return courierRepository.findById(id).orElse(null);
+
+        return courierRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
     public void saveCourier(Courier courier) {
@@ -36,11 +38,27 @@ public class CourierService {
     }
 
     public List<Courier> getAllCourier() {
-        return courierRepository.findAll();
+        List<Courier> orders = courierRepository.findAll();
+        if (orders.isEmpty()) {
+            throw new EntityNotFoundException();
+        }
+        return orders;
     }
 
     private void enrichCourier(Courier courier) {
         courier.setCourierStatus(Courier.CourierStatus.FREE);
     }
 
+    public Courier getCourierByEmail(String email) {
+
+        return courierRepository.findCourierByEmail(email).orElseThrow(EntityNotFoundException::new);
+    }
+
+    public Courier getCourierByPhoneNumber(String phoneNumber) {
+        return courierRepository.findCourierByPhoneNumber(phoneNumber).orElseThrow(EntityNotFoundException::new);
+    }
+
+    public Courier getCourierByInn(String inn) {
+        return courierRepository.findCourierByInn(inn).orElseThrow(EntityNotFoundException::new);
+    }
 }

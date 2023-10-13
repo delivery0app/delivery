@@ -1,5 +1,6 @@
 package com.factglobal.delivery.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -49,7 +50,7 @@ public class Courier {
     @Enumerated(EnumType.STRING)
     @Column(name = "courier_status")
     private CourierStatus courierStatus;
-
+    @JsonIgnore
     @OneToMany(mappedBy = "courier")
     private List<Order> orders;
 

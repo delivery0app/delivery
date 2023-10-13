@@ -4,10 +4,14 @@ import com.factglobal.delivery.dto.OrderDTO;
 import com.factglobal.delivery.models.Order;
 import com.factglobal.delivery.services.OrderService;
 import com.factglobal.delivery.util.common.OrderBPM;
+import jakarta.persistence.EntityExistsException;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,8 +41,10 @@ public class OrderController {
     }
 
     @PostMapping("/customers/{id}")
-    public ResponseEntity<HttpStatus> createOrderByCustomer(@RequestBody OrderDTO orderDTO,
+    public ResponseEntity<HttpStatus> createOrderByCustomer(@RequestBody @Valid OrderDTO orderDTO,
+                                                            BindingResult bindingResult,
                                                             @PathVariable("id") int id) {
+        errorMessage(bindingResult);
         orderService.saveOrderByCustomer(convertToOrder(orderDTO), id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
@@ -56,11 +62,15 @@ public class OrderController {
     }
 
     @PutMapping
-    public ResponseEntity<HttpStatus> editOrder(@RequestBody OrderDTO orderDTO) {
+    public ResponseEntity<HttpStatus> editOrder(@RequestBody @Valid OrderDTO orderDTO,
+                                                BindingResult bindingResult) {
+        errorMessage(bindingResult);
+
         if (orderDTO.getOrderStatus() == OrderBPM.State.NEW)
             orderService.saveOrder(convertToOrder(orderDTO));
         else
             throw new RuntimeException();//TODO (This order cannot be changed, it is already in process)
+
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -98,7 +108,21 @@ public class OrderController {
     private Order convertToOrder(OrderDTO orderDTO) {
         return modelMapper.map(orderDTO, Order.class);
     }
+
     private OrderDTO convertToOrderDTO(Order order) {
         return modelMapper.map(order, OrderDTO.class);
+    }
+    static void errorMessage(BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMsg = new StringBuilder();
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors) {
+                errorMsg.append(error.getField())
+                        .append(" – ")
+                        .append(error.getDefaultMessage())
+                        .append("; ");
+            }
+            throw new EntityExistsException(errorMsg.toString());
+        }
     }
 }
