@@ -1,12 +1,16 @@
-import com.factglobal.delivery.models.Order;
+package com.factglobal.delivery.models;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;Getter
+import java.util.List;
+
+@Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
