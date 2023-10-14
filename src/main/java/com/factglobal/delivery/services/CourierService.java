@@ -28,7 +28,7 @@ public class CourierService {
     }
 
     public void saveCourier(Courier courier) {
-        if (courier.getId() == 0)
+//        if (courier.getId() == 0)
             enrichCourier(courier);
         courierRepository.save(courier);
     }
