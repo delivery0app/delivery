@@ -40,7 +40,8 @@ public class OrderService {
     }
 
     public void saveOrderByCustomer(Order order, int customerId) {
-        order.setCustomer(customerRepository.findById(customerId).orElse(null));
+        order.setCustomer(customerRepository.findById(customerId)
+                .orElseThrow(() -> new EntityNotFoundException("Customer with this id does not exist")));
         enrichOrder(order);
         orderRepository.save(order);
 

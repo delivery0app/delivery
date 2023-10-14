@@ -35,7 +35,7 @@ public class CourierValidator implements Validator {
             errors.rejectValue("phoneNumber", "", "This phone number is already taken");
         }
         if (courierService.getCourierByInn(inn) != null) {
-            errors.rejectValue("INN", "", "This INN number is already registered");
+            errors.rejectValue("inn", "", "This INN number is already registered");
         }
 
     }

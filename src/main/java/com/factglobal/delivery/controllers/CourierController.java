@@ -43,11 +43,12 @@ public class CourierController {
     }
 
     @PostMapping()
-    public ResponseEntity<HttpStatus> addCourier(@RequestBody @Valid Courier courierDTO,
+    public ResponseEntity<HttpStatus> addCourier(@RequestBody @Valid CourierDTO courierDTO,
                                                  BindingResult bindingResult) {
-        courierValidator.validate(courierDTO, bindingResult);
+
+        courierValidator.validate(convertToCourier(courierDTO), bindingResult);
         errorMessage(bindingResult);
-        courierService.saveCourier(courierDTO);
+        courierService.saveCourier(convertToCourier(courierDTO));
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
