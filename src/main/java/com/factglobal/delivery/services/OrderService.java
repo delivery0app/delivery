@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -40,6 +41,9 @@ public class OrderService {
 
     public void saveOrderByCustomer(Order order, int customerId) {
         order.setCustomer(customerRepository.findById(customerId).orElse(null));
+        enrichOrder(order);
+        orderRepository.save(order);
+
     }
 
     public void cancelOrder(int id) {
@@ -47,13 +51,13 @@ public class OrderService {
         if (order.getOrderStatus() == OrderBPM.State.NEW)
             order.setOrderStatus(OrderBPM.State.CANCELED);
         else
-            throw new RuntimeException();//TODO (This order is already in progress or delivered)
+            throw new RuntimeException("This order is already in progress or delivered");//TODO (This order is already in progress or delivered)
         orderRepository.save(order);
     }
 
     public Order getOrder(int id) {
         Optional<Order> foundOrder = orderRepository.findById(id);
-        return foundOrder.orElseThrow(EntityNotFoundException::new);
+        return foundOrder.orElseThrow(() -> new EntityNotFoundException("Order with this id does not exist"));
     }
 
     public List<Order> getAllOrders() {
@@ -70,15 +74,16 @@ public class OrderService {
 
     public void assignCourierToOrder(int orderId, int courierId) {
         Order order = getOrder(orderId);
-        Courier courier = courierRepository.findById(courierId).orElse(null);
+        Courier courier = courierRepository.findById(courierId)
+                .orElseThrow(() -> new EntityNotFoundException("Courier with this id does not exist"));
 
-        if (courier != null && courier.getCourierStatus() == Courier.CourierStatus.FREE) {
+        if (courier.getCourierStatus() == Courier.CourierStatus.FREE) {
             order.setCourier(courier);
             courier.setCourierStatus(Courier.CourierStatus.BUSY);
             saveOrder(order);
             courierRepository.save(courier);
         } else
-            throw new RuntimeException();//TODO (This courier is already busy or this courier is not exist)
+            throw new RuntimeException("This courier is already busy or this courier is not exist");//TODO (This courier is already busy or this courier is not exist)
 
     }
 
@@ -89,7 +94,8 @@ public class OrderService {
     }
 
     public List<Order> getOrdersByCourier(int courierId) {
-        Courier courier = courierRepository.findById(courierId).orElse(null);
+        Courier courier = courierRepository.findById(courierId)
+                .orElseThrow(() -> new EntityNotFoundException("Courier with this id does not exist"));
         List<Order> orders = orderRepository.findOrdersByCourier(courier);
         if (orders.isEmpty()) {
             throw new NoSuchElementException();
@@ -98,11 +104,13 @@ public class OrderService {
     }
 
     public List<Order> getOrdersByCustomer(int customerId) {
-        Customer customer = customerRepository.findById(customerId).orElse(null);
+        Customer customer = customerRepository.findById(customerId).
+                orElseThrow(() -> new EntityNotFoundException("Customer with this id does not exist"));
+
         List<Order> orders = orderRepository.findOrdersByCustomer(customer);
-        if (orders.isEmpty()) {
+
+        if (orders.isEmpty())
             throw new NoSuchElementException();
-        }
         return orders;
     }
 
@@ -139,5 +147,6 @@ public class OrderService {
         order.setOrderStatus(OrderBPM.State.NEW);
         order.setPrice(calculateShippingCost(order));
         order.setCreationDate(LocalDateTime.now());
+        order.setDeliveryDate(LocalDate.now().plusDays(10));
     }
 }

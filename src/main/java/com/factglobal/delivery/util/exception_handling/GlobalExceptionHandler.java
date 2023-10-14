@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
         body.put("status", HttpStatus.BAD_REQUEST);
         body.put("error", "EntityNotFoundException");
         body.put("message", ex.getMessage());
-        body.put("details", "Order not found");
+        body.put("details", "Entity not found");
         body.put("path", request.getServletPath());
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);

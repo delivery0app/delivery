@@ -65,12 +65,10 @@ public class OrderController {
     public ResponseEntity<HttpStatus> editOrder(@RequestBody @Valid OrderDTO orderDTO,
                                                 BindingResult bindingResult) {
         errorMessage(bindingResult);
-
         if (orderDTO.getOrderStatus() == OrderBPM.State.NEW)
             orderService.saveOrder(convertToOrder(orderDTO));
         else
-            throw new RuntimeException();//TODO (This order cannot be changed, it is already in process)
-
+            throw new RuntimeException("This order cannot be changed, it is already in process");//TODO (This order cannot be changed, it is already in process)
         return ResponseEntity.ok(HttpStatus.OK);
     }
 

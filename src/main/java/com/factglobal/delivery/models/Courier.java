@@ -38,7 +38,7 @@ public class Courier {
     private String phoneNumber;
 
     @Email
-    @NotEmpty
+    @NotBlank(message = "Email number should not be empty")
     @Column(name = "email")
     private String email;
 

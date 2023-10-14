@@ -22,12 +22,13 @@ import java.util.stream.Collectors;
 public class CourierController {
     private final CourierService courierService;
     private final ModelMapper modelMapper;
-    private CourierValidator courierValidator;
+    private final CourierValidator courierValidator;
 
     @Autowired
-    public CourierController(CourierService courierService, ModelMapper modelMapper) {
+    public CourierController(CourierService courierService, ModelMapper modelMapper, CourierValidator courierValidator) {
         this.courierService = courierService;
         this.modelMapper = modelMapper;
+        this.courierValidator = courierValidator;
     }
 
     @GetMapping("/{id}")
@@ -42,11 +43,11 @@ public class CourierController {
     }
 
     @PostMapping()
-    public ResponseEntity<HttpStatus> addCourier(@RequestBody @Valid CourierDTO courierDTO,
+    public ResponseEntity<HttpStatus> addCourier(@RequestBody @Valid Courier courierDTO,
                                                  BindingResult bindingResult) {
         courierValidator.validate(courierDTO, bindingResult);
         errorMessage(bindingResult);
-        courierService.saveCourier(convertToCourier(courierDTO));
+        courierService.saveCourier(courierDTO);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
