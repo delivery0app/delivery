@@ -32,25 +32,25 @@ public class GlobalExceptionHandler {
         final Map<String, Object> body = new TreeMap<>();
 
         body.put("status", HttpStatus.BAD_REQUEST);
-        body.put("error", "EntityNotFoundException");
+        body.put("error", "NoSuchElementException");
         body.put("message", ex.getMessage());
         body.put("details", "No orders found");
         body.put("path", request.getServletPath());
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
-    @ExceptionHandler({EntityExistsException.class})
-    public ResponseEntity<Map<String, Object>> entityExistsException(EntityExistsException ex, HttpServletRequest request) {
-        final Map<String, Object> body = new TreeMap<>();
-
-        body.put("status", HttpStatus.BAD_REQUEST);
-        body.put("error", "EntityExistsException");
-        body.put("message", ex.getMessage());
-        body.put("details", "Change the data in the request body");
-        body.put("path", request.getServletPath());
-
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-    }
+//    @ExceptionHandler({EntityExistsException.class})
+//    public ResponseEntity<Map<String, Object>> entityExistsException(EntityExistsException ex, HttpServletRequest request) {
+//        final Map<String, Object> body = new TreeMap<>();
+//
+//        body.put("status", HttpStatus.BAD_REQUEST);
+//        body.put("error", "EntityExistsException");
+//        body.put("message", ex.getMessage());
+//        body.put("details", "Change the data in the request body");
+//        body.put("path", request.getServletPath());
+//
+//        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+//    }
     @ExceptionHandler({Exception.class})
     public ResponseEntity<Map<String, Object>> unknownException(Exception ex, HttpServletRequest request) {
         final Map<String, Object> body = new TreeMap<>();

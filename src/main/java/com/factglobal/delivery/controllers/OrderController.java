@@ -54,7 +54,7 @@ public class OrderController {
         if (orderService.getOrder(id).getOrderStatus() == OrderBPM.State.NEW)
             orderService.deleteOrder(id);
         else
-            throw new RuntimeException();//TODO (This order cannot be delete, it is already in process)
+            throw new RuntimeException("This order cannot be delete, it is already in process");//TODO (This order cannot be delete, it is already in process)
         //но мне кажется, что тут не должны эти ограничения стоять, если этот метод попадёт в руки админа, то
         //у него не должно быть ограничений, а вот уже если заказчик будет менять заказ,
         //то там и надо  будет прописывать ограничения.
@@ -97,7 +97,7 @@ public class OrderController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}/couriers")
+    @PutMapping("/{id}/couriers")
     public ResponseEntity<HttpStatus> releaseCourierFromOrder(@PathVariable("id") int id) {
         orderService.releaseCourierFromOrder(id);
         return ResponseEntity.ok(HttpStatus.OK);

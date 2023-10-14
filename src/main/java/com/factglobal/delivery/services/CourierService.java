@@ -28,7 +28,7 @@ public class CourierService {
     }
 
     public void saveCourier(Courier courier) {
-//        if (courier.getId() == 0)
+        if (courier.getId() == 0)
             enrichCourier(courier);
         courierRepository.save(courier);
     }
@@ -51,14 +51,14 @@ public class CourierService {
 
     public Courier getCourierByEmail(String email) {
 
-        return courierRepository.findCourierByEmail(email).orElseThrow(EntityNotFoundException::new);
+        return courierRepository.findCourierByEmail(email).orElse(null);
     }
 
     public Courier getCourierByPhoneNumber(String phoneNumber) {
-        return courierRepository.findCourierByPhoneNumber(phoneNumber).orElseThrow(EntityNotFoundException::new);
+        return courierRepository.findCourierByPhoneNumber(phoneNumber).orElse(null);
     }
 
     public Courier getCourierByInn(String inn) {
-        return courierRepository.findCourierByInn(inn).orElseThrow(EntityNotFoundException::new);
+        return courierRepository.findCourierByInn(inn).orElse(null);
     }
 }
