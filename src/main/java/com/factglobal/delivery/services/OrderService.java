@@ -46,8 +46,18 @@ public class OrderService {
         if (order.getOrderStatus() == OrderBPM.State.NEW)
             order.setOrderStatus(OrderBPM.State.CANCELED);
         else
-            throw new RuntimeException("This order is already in progress or delivered");
+            throw new IllegalStateException("The order status is: " + order.getOrderStatus() + " and cannot be canceled");
         orderRepository.save(order);
+    }
+
+    public void deliveredOrder(int id) {
+        Order order = getOrder(id);
+
+        if (order.getOrderStatus() == OrderBPM.State.IN_PROGRESS)
+            order.setOrderStatus(OrderBPM.State.DELIVERED);
+        else
+            throw new IllegalStateException("The order status is: " + order.getOrderStatus() + ", but should be in progress");
+
     }
 
     public Order getOrder(int id) {
@@ -71,28 +81,39 @@ public class OrderService {
         Order order = getOrder(orderId);
         Courier courier = courierService.getCourier(courierId);
 
-        if (courier.getCourierStatus() == Courier.CourierStatus.FREE) {
+        if (courier.getCourierStatus() == Courier.CourierStatus.FREE &&
+            order.getOrderStatus() == OrderBPM.State.NEW) {
+
             order.setCourier(courier);
             courier.setCourierStatus(Courier.CourierStatus.BUSY);
+            order.setOrderStatus(OrderBPM.State.IN_PROGRESS);
             saveOrder(order);
             courierService.saveCourier(courier);
         } else
-            throw new RuntimeException("This courier is already busy or this courier is not exist");
+            throw new IllegalStateException("This courier is already busy or the order is unavailable");
 
     }
 
-    public void releaseCourierFromOrder(int orderId) {
+    public void releaseCourierFromOrder(int orderId, int courierId) {
         Order order = getOrder(orderId);
-        order.setCourier(null);
-        orderRepository.save(order);
+        Courier courier = courierService.getCourier(courierId);
+
+        if (order.getOrderStatus() == OrderBPM.State.IN_PROGRESS &&
+            courier.getCourierStatus() == Courier.CourierStatus.BUSY) {
+
+            order.setCourier(null);
+            order.setOrderStatus(OrderBPM.State.NEW);
+            courier.setCourierStatus(Courier.CourierStatus.FREE);
+            saveOrder(order);
+            courierService.saveCourier(courier);
+        } else
+            throw new IllegalStateException("this courier does not have an order or " +
+                    "the order is either new or completed");
     }
 
     public List<Order> getOrdersByCourier(int courierId) {
-        System.out.println("1");
         Courier courier = courierService.getCourier(courierId);
-        System.out.println("2");
         List<Order> orders = orderRepository.findOrdersByCourier(courier);
-        System.out.println("3");
         if (orders.isEmpty()) {
             throw new NoSuchElementException("This courier has no orders");
         }
@@ -113,7 +134,7 @@ public class OrderService {
 
         List<Order> orders = orderRepository.findOrdersByOrderStatus(orderStatus);
         if (orders.isEmpty()) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("This status has no orders");
         }
         return orders;
     }

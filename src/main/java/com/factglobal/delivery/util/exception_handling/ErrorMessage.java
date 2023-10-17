@@ -20,7 +20,7 @@ public class ErrorMessage {
                         .append(error.getDefaultMessage())
                         .append("; ");
             }
-            throw new EntityNotFoundException(errorMessage.toString());
+            throw new IllegalArgumentException(errorMessage.toString());
         }
     }
 }
