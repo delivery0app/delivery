@@ -9,6 +9,7 @@ import com.factglobal.delivery.repositories.OrderRepository;
 import com.factglobal.delivery.util.common.OrderBPM;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,17 +22,11 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final CourierRepository courierRepository;
-    private final CustomerRepository customerRepository;
-
-    @Autowired
-    public OrderService(OrderRepository orderRepository, CourierRepository courierRepository, CustomerRepository customerRepository) {
-        this.orderRepository = orderRepository;
-        this.courierRepository = courierRepository;
-        this.customerRepository = customerRepository;
-    }
+    private final CourierService courierService;
+    private final CustomerService customerService;
 
     public void saveOrder(Order order) {
         if (order.getId() == 0)
@@ -40,8 +35,7 @@ public class OrderService {
     }
 
     public void saveOrderByCustomer(Order order, int customerId) {
-        order.setCustomer(customerRepository.findById(customerId)
-                .orElseThrow(() -> new EntityNotFoundException("Customer with this id does not exist")));
+        order.setCustomer(customerService.getCustomer(customerId));
         enrichOrder(order);
         orderRepository.save(order);
 
@@ -52,13 +46,13 @@ public class OrderService {
         if (order.getOrderStatus() == OrderBPM.State.NEW)
             order.setOrderStatus(OrderBPM.State.CANCELED);
         else
-            throw new RuntimeException("This order is already in progress or delivered");//TODO (This order is already in progress or delivered)
+            throw new RuntimeException("This order is already in progress or delivered");
         orderRepository.save(order);
     }
 
     public Order getOrder(int id) {
         Optional<Order> foundOrder = orderRepository.findById(id);
-        return foundOrder.orElseThrow(() -> new EntityNotFoundException("Order with this id does not exist"));
+        return foundOrder.orElseThrow(() -> new EntityNotFoundException("Order with this id: " + id + " does not exist"));
     }
 
     public List<Order> getAllOrders() {
@@ -75,16 +69,15 @@ public class OrderService {
 
     public void assignCourierToOrder(int orderId, int courierId) {
         Order order = getOrder(orderId);
-        Courier courier = courierRepository.findById(courierId)
-                .orElseThrow(() -> new EntityNotFoundException("Courier with this id does not exist"));
+        Courier courier = courierService.getCourier(courierId);
 
         if (courier.getCourierStatus() == Courier.CourierStatus.FREE) {
             order.setCourier(courier);
             courier.setCourierStatus(Courier.CourierStatus.BUSY);
             saveOrder(order);
-            courierRepository.save(courier);
+            courierService.saveCourier(courier);
         } else
-            throw new RuntimeException("This courier is already busy or this courier is not exist");//TODO (This courier is already busy or this courier is not exist)
+            throw new RuntimeException("This courier is already busy or this courier is not exist");
 
     }
 
@@ -95,23 +88,24 @@ public class OrderService {
     }
 
     public List<Order> getOrdersByCourier(int courierId) {
-        Courier courier = courierRepository.findById(courierId)
-                .orElseThrow(() -> new EntityNotFoundException("Courier with this id does not exist"));
+        System.out.println("1");
+        Courier courier = courierService.getCourier(courierId);
+        System.out.println("2");
         List<Order> orders = orderRepository.findOrdersByCourier(courier);
+        System.out.println("3");
         if (orders.isEmpty()) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("This courier has no orders");
         }
         return orders;
     }
 
     public List<Order> getOrdersByCustomer(int customerId) {
-        Customer customer = customerRepository.findById(customerId).
-                orElseThrow(() -> new EntityNotFoundException("Customer with this id does not exist"));
+        Customer customer = customerService.getCustomer(customerId);
 
         List<Order> orders = orderRepository.findOrdersByCustomer(customer);
 
         if (orders.isEmpty())
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("This customer has no orders");
         return orders;
     }
 

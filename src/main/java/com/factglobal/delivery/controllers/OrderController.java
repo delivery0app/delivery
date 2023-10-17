@@ -4,30 +4,24 @@ import com.factglobal.delivery.dto.OrderDTO;
 import com.factglobal.delivery.models.Order;
 import com.factglobal.delivery.services.OrderService;
 import com.factglobal.delivery.util.common.OrderBPM;
-import jakarta.persistence.EntityExistsException;
+import com.factglobal.delivery.util.exception_handling.ErrorMessage;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/orders")
 public class OrderController {
     private final OrderService orderService;
     private final ModelMapper modelMapper;
-
-    @Autowired
-    public OrderController(OrderService orderService, ModelMapper modelMapper) {
-        this.orderService = orderService;
-        this.modelMapper = modelMapper;
-    }
 
     @GetMapping
     public List<OrderDTO> getAllOrders() {
@@ -44,7 +38,7 @@ public class OrderController {
     public ResponseEntity<HttpStatus> createOrderByCustomer(@RequestBody @Valid OrderDTO orderDTO,
                                                             BindingResult bindingResult,
                                                             @PathVariable("id") int id) {
-        errorMessage(bindingResult);
+        ErrorMessage.errorMessage(bindingResult);
         orderService.saveOrderByCustomer(convertToOrder(orderDTO), id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
@@ -54,21 +48,21 @@ public class OrderController {
         if (orderService.getOrder(id).getOrderStatus() == OrderBPM.State.NEW)
             orderService.deleteOrder(id);
         else
-            throw new RuntimeException("This order cannot be delete, it is already in process");//TODO (This order cannot be delete, it is already in process)
-        //но мне кажется, что тут не должны эти ограничения стоять, если этот метод попадёт в руки админа, то
-        //у него не должно быть ограничений, а вот уже если заказчик будет менять заказ,
-        //то там и надо  будет прописывать ограничения.
+            throw new RuntimeException("This order cannot be delete, it is already in process");
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     public ResponseEntity<HttpStatus> editOrder(@RequestBody @Valid OrderDTO orderDTO,
-                                                BindingResult bindingResult) {
-        errorMessage(bindingResult);
+                                                BindingResult bindingResult,
+                                                @PathVariable("id") int id) {
+        Order order = convertToOrder(orderDTO);
+        order.setId(id);
+        ErrorMessage.errorMessage(bindingResult);
         if (orderDTO.getOrderStatus() == OrderBPM.State.NEW)
-            orderService.saveOrder(convertToOrder(orderDTO));
+            orderService.saveOrder(order);
         else
-            throw new RuntimeException("This order cannot be changed, it is already in process");//TODO (This order cannot be changed, it is already in process)
+            throw new RuntimeException("This order cannot be changed, it is already in process");
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -84,7 +78,7 @@ public class OrderController {
                 .map(this::convertToOrderDTO).collect(Collectors.toList());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/cancel")
     public ResponseEntity<HttpStatus> cancelOrder(@PathVariable("id") int id) {
         orderService.cancelOrder(id);
         return ResponseEntity.ok(HttpStatus.OK);
@@ -109,18 +103,5 @@ public class OrderController {
 
     private OrderDTO convertToOrderDTO(Order order) {
         return modelMapper.map(order, OrderDTO.class);
-    }
-    static void errorMessage(BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors) {
-                errorMsg.append(error.getField())
-                        .append(" – ")
-                        .append(error.getDefaultMessage())
-                        .append("; ");
-            }
-            throw new EntityExistsException(errorMsg.toString());
-        }
     }
 }

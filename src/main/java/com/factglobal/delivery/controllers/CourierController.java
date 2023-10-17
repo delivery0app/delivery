@@ -3,37 +3,30 @@ package com.factglobal.delivery.controllers;
 import com.factglobal.delivery.dto.CourierDTO;
 import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.services.CourierService;
+import com.factglobal.delivery.util.exception_handling.ErrorMessage;
 import com.factglobal.delivery.util.validation.CourierValidator;
-import jakarta.persistence.EntityExistsException;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/couriers")
 public class CourierController {
     private final CourierService courierService;
     private final ModelMapper modelMapper;
     private final CourierValidator courierValidator;
 
-    @Autowired
-    public CourierController(CourierService courierService, ModelMapper modelMapper, CourierValidator courierValidator) {
-        this.courierService = courierService;
-        this.modelMapper = modelMapper;
-        this.courierValidator = courierValidator;
-    }
-
     @GetMapping("/{id}")
-    public Courier getCourier(@PathVariable("id") int id) {
-        return courierService.getCourier(id);
+    public CourierDTO getCourier(@PathVariable("id") int id) {
+        return convertToCourierDTO(courierService.getCourier(id));
     }
 
     @GetMapping()
@@ -47,17 +40,20 @@ public class CourierController {
                                                  BindingResult bindingResult) {
 
         courierValidator.validate(convertToCourier(courierDTO), bindingResult);
-        errorMessage(bindingResult);
+        ErrorMessage.errorMessage(bindingResult);
         courierService.saveCourier(convertToCourier(courierDTO));
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PutMapping()
-    public ResponseEntity<HttpStatus> editCourier(@RequestBody @Valid CourierDTO courierDTO
-            , BindingResult bindingResult) {
-        courierValidator.validate(courierDTO, bindingResult);
-        errorMessage(bindingResult);
-        courierService.saveCourier(convertToCourier(courierDTO));
+    @PutMapping("/{id}")
+    public ResponseEntity<HttpStatus> editCourier(@RequestBody @Valid CourierDTO courierDTO,
+                                                  BindingResult bindingResult,
+                                                  @PathVariable("id") int id) {
+        Courier courier = convertToCourier(courierDTO);
+        courier.setId(id);
+        courierValidator.validate(courier, bindingResult);
+        ErrorMessage.errorMessage(bindingResult);
+        courierService.saveCourier(courier);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -73,19 +69,5 @@ public class CourierController {
 
     private CourierDTO convertToCourierDTO(Courier courier) {
         return modelMapper.map(courier, CourierDTO.class);
-    }
-
-    static void errorMessage(BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors) {
-                errorMsg.append(error.getField())
-                        .append(" – ")
-                        .append(error.getDefaultMessage())
-                        .append("; ");
-            }
-            throw new EntityExistsException(errorMsg.toString());
-        }
     }
 }

@@ -1,6 +1,6 @@
 package com.factglobal.delivery.util.exception_handling;
 
-import jakarta.persistence.EntityExistsException;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
