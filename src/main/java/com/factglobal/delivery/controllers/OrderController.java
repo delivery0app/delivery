@@ -84,6 +84,12 @@ public class OrderController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
+    @PutMapping("/{id}/delivered")
+    public ResponseEntity<HttpStatus> deliveredOrder(@PathVariable("id") int id) {
+        orderService.deliveredOrder(id);
+        return ResponseEntity.ok(HttpStatus.OK);
+    }
+
     @PutMapping("/{order_id}/couriers/{courier_id}")
     public ResponseEntity<HttpStatus> assignCourierForOrder(@PathVariable("order_id") int orderId,
                                                             @PathVariable("courier_id") int courierId) {
@@ -91,9 +97,10 @@ public class OrderController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PutMapping("/{id}/couriers")
-    public ResponseEntity<HttpStatus> releaseCourierFromOrder(@PathVariable("id") int id) {
-        orderService.releaseCourierFromOrder(id);
+    @PutMapping("/{order_id}/couriers/{courier_id}")
+    public ResponseEntity<HttpStatus> releaseCourierFromOrder(@PathVariable("order_id") int orderId,
+                                                              @PathVariable("courier_id") int courierId) {
+        orderService.releaseCourierFromOrder(orderId, courierId);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 

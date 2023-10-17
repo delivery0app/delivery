@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @Transactional
@@ -32,7 +33,7 @@ public class CustomerService {
         List<Customer> customers = customerRepository.findAll();
 
         if (customers.isEmpty())
-            throw new EntityNotFoundException("No customer has been registered yet");
+            throw new NoSuchElementException("No customer has been registered yet");
 
         return customers;
     }

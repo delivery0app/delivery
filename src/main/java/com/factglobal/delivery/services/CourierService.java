@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @Transactional
@@ -35,7 +36,7 @@ public class CourierService {
     public List<Courier> getAllCourier() {
         List<Courier> orders = courierRepository.findAll();
         if (orders.isEmpty()) {
-            throw new EntityNotFoundException("No courier has been registered yet");
+            throw new NoSuchElementException("No courier has been registered yet");
         }
         return orders;
     }
