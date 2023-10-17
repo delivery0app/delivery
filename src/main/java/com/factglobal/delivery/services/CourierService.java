@@ -2,29 +2,24 @@ package com.factglobal.delivery.services;
 
 
 import com.factglobal.delivery.models.Courier;
-import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.repositories.CourierRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class CourierService {
     private final CourierRepository courierRepository;
 
-    @Autowired
-    public CourierService(CourierRepository courierRepository) {
-        this.courierRepository = courierRepository;
-    }
-
     public Courier getCourier(int id) {
 
-        return courierRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        return courierRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Courier with id: " + id + " was not found"));
     }
 
     public void saveCourier(Courier courier) {
@@ -40,7 +35,7 @@ public class CourierService {
     public List<Courier> getAllCourier() {
         List<Courier> orders = courierRepository.findAll();
         if (orders.isEmpty()) {
-            throw new EntityNotFoundException();
+            throw new EntityNotFoundException("No courier has been registered yet");
         }
         return orders;
     }
