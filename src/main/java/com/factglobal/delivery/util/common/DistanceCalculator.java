@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 @Component
@@ -34,7 +36,8 @@ public class DistanceCalculator {
 
     //Получение координат города
     private HashMap<String, Double> getCoordinate(String city) throws IOException{
-        String url = "https://nominatim.openstreetmap.org/search?q=" + city + "&format=json";
+        String query = URLEncoder.encode(city, StandardCharsets.UTF_8);
+        String url = "https://nominatim.openstreetmap.org/search?q=" + query + "&format=json";
         URL obj1 = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj1.openConnection();
         con.setRequestMethod("GET");
