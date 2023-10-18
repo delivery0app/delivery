@@ -1,7 +1,5 @@
 package com.factglobal.delivery.util.exception_handling;
 
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
@@ -9,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ErrorMessage {
-    public static void errorMessage(BindingResult bindingResult) {
+    public static void validationError(BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             StringBuilder errorMessage = new StringBuilder();
             List<FieldError> errors = new ArrayList<>(bindingResult.getFieldErrors());

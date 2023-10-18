@@ -26,6 +26,7 @@ public class CourierService {
     public void saveCourier(Courier courier) {
         if (courier.getId() == 0)
             enrichCourier(courier);
+
         courierRepository.save(courier);
     }
 
@@ -35,14 +36,14 @@ public class CourierService {
 
     public List<Courier> getAllCourier() {
         List<Courier> orders = courierRepository.findAll();
-        if (orders.isEmpty()) {
+
+        if (orders.isEmpty())
             throw new NoSuchElementException("No courier has been registered yet");
-        }
         return orders;
     }
 
     private void enrichCourier(Courier courier) {
-        courier.setCourierStatus(Courier.CourierStatus.FREE);
+        courier.setCourierStatus(Courier.Status.FREE);
     }
 
     public Courier getCourierByEmail(String email) {
