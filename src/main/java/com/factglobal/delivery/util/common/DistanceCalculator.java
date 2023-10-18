@@ -27,11 +27,6 @@ public class DistanceCalculator {
         city2Lat = coordinateCity2.get("cityLat");
         city2Lon = coordinateCity2.get("cityLon");
 
-        System.out.println(city1Lat);
-        System.out.println(city1Lon);
-        System.out.println(city2Lat);
-        System.out.println(city2Lon);
-
         int distance = (int) Math.round(calculateDistance(city1Lat, city1Lon, city2Lat, city2Lon));
 
         return distance;
