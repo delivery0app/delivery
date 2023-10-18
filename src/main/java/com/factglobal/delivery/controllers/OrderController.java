@@ -38,17 +38,17 @@ public class OrderController {
     public ResponseEntity<HttpStatus> createOrderByCustomer(@RequestBody @Valid OrderDTO orderDTO,
                                                             BindingResult bindingResult,
                                                             @PathVariable("id") int id) {
-        ErrorMessage.errorMessage(bindingResult);
+        ErrorMessage.validationError(bindingResult);
         orderService.saveOrderByCustomer(convertToOrder(orderDTO), id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteOrder(@PathVariable("id") int id) {
-        if (orderService.getOrder(id).getOrderStatus() == OrderBPM.State.NEW)
-            orderService.deleteOrder(id);
-        else
-            throw new RuntimeException("This order cannot be delete, it is already in process");
+        if (orderService.getOrder(id).getOrderStatus() != OrderBPM.State.NEW)
+            throw new IllegalStateException("This order cannot be delete, it is already in process");
+
+        orderService.deleteOrder(id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -56,13 +56,11 @@ public class OrderController {
     public ResponseEntity<HttpStatus> editOrder(@RequestBody @Valid OrderDTO orderDTO,
                                                 BindingResult bindingResult,
                                                 @PathVariable("id") int id) {
-        Order order = convertToOrder(orderDTO);
-        order.setId(id);
-        ErrorMessage.errorMessage(bindingResult);
-        if (orderDTO.getOrderStatus() == OrderBPM.State.NEW)
-            orderService.saveOrder(order);
-        else
-            throw new RuntimeException("This order cannot be changed, it is already in process");
+        ErrorMessage.validationError(bindingResult);
+        if (orderDTO.getOrderStatus() != OrderBPM.State.NEW)
+            throw new IllegalStateException("This order cannot be changed, it is already in process");
+
+        orderService.editOrder(convertToOrder(orderDTO), id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 

@@ -1,9 +1,6 @@
 package com.factglobal.delivery.dto;
 
 import com.factglobal.delivery.models.Courier;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,5 +34,5 @@ public class CourierDTO {
             , message = "Password should contain at least one number, one lowercase and one uppercase letter, and be at least 8 characters long")
     private String password;
 
-    private Courier.CourierStatus courierStatus;
+    private Courier.Status courierStatus;
 }

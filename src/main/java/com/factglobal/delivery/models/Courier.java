@@ -6,7 +6,6 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -49,12 +48,12 @@ public class Courier {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "courier_status")
-    private CourierStatus courierStatus;
+    private Status courierStatus;
     @JsonIgnore
     @OneToMany(mappedBy = "courier")
     private List<Order> orders;
 
-    public enum CourierStatus {
+    public enum Status {
         FREE, BUSY
     }
 }
