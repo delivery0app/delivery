@@ -3,16 +3,15 @@ package com.factglobal.delivery.services;
 import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.models.Order;
-import com.factglobal.delivery.repositories.CourierRepository;
-import com.factglobal.delivery.repositories.CustomerRepository;
 import com.factglobal.delivery.repositories.OrderRepository;
+import com.factglobal.delivery.util.common.DistanceCalculator;
 import com.factglobal.delivery.util.common.OrderBPM;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,6 +26,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CourierService courierService;
     private final CustomerService customerService;
+    private final DistanceCalculator distanceCalculator;
 
     public void saveOrder(Order order) {
         if (order.getId() == 0)
@@ -153,15 +153,21 @@ public class OrderService {
         }
 
         if (order.getFragileCargo())
-            price = order.getDistance() * 0.6 * 1.3 * coefficientWeigth;
+            price = order.getDistance() * 0.01 * 1.3 * coefficientWeigth;
         else
-            price = order.getDistance() * 0.6 * coefficientWeigth;
+            price = order.getDistance() * 0.01 * coefficientWeigth;
+
         return price;
     }
 
     private void enrichOrder(Order order) {
+        try {
+            order.setDistance(distanceCalculator.getDistance(order.getSenderAddress(), order.getDeliveryAddress()));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Enter the correct city");
+        }
         order.setOrderStatus(OrderBPM.State.NEW);
-        order.setPrice(calculateShippingCost(order));
+        order.setPrice(Math.ceil(calculateShippingCost(order) * Math.pow(10, 2)) / Math.pow(10, 2));
         order.setCreationDate(LocalDateTime.now());
         order.setDeliveryDate(LocalDate.now().plusDays(10));
     }
