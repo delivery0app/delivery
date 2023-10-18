@@ -90,14 +90,14 @@ public class OrderController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PutMapping("/{order_id}/couriers/{courier_id}")
+    @PutMapping("/{order_id}/couriers/{courier_id}/assign")
     public ResponseEntity<HttpStatus> assignCourierForOrder(@PathVariable("order_id") int orderId,
                                                             @PathVariable("courier_id") int courierId) {
         orderService.assignCourierToOrder(orderId, courierId);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PutMapping("/{order_id}/couriers/{courier_id}")
+    @PutMapping("/{order_id}/couriers/{courier_id}/release")
     public ResponseEntity<HttpStatus> releaseCourierFromOrder(@PathVariable("order_id") int orderId,
                                                               @PathVariable("courier_id") int courierId) {
         orderService.releaseCourierFromOrder(orderId, courierId);
