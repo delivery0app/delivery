@@ -28,9 +28,14 @@ public class OrderService {
     private final CustomerService customerService;
     private final DistanceCalculator distanceCalculator;
 
-    public void saveOrder(Order order) {
-        if (order.getId() == 0)
-            enrichOrder(order);
+//    public void saveOrder(Order order) {
+//        if (order.getId() == 0)
+//            enrichOrder(order);
+//        orderRepository.save(order);
+//    }
+
+    public void editOrder(Order order, int id) {
+        order.setId(id);
         orderRepository.save(order);
     }
 
@@ -38,7 +43,6 @@ public class OrderService {
         order.setCustomer(customerService.getCustomer(customerId));
         enrichOrder(order);
         orderRepository.save(order);
-
     }
 
     public void cancelOrder(int id) {
@@ -81,13 +85,13 @@ public class OrderService {
         Order order = getOrder(orderId);
         Courier courier = courierService.getCourier(courierId);
 
-        if (courier.getCourierStatus() == Courier.CourierStatus.FREE &&
-            order.getOrderStatus() == OrderBPM.State.NEW) {
+        if (courier.getCourierStatus() == Courier.Status.FREE &&
+                order.getOrderStatus() == OrderBPM.State.NEW) {
 
             order.setCourier(courier);
-            courier.setCourierStatus(Courier.CourierStatus.BUSY);
+            courier.setCourierStatus(Courier.Status.BUSY);
             order.setOrderStatus(OrderBPM.State.IN_PROGRESS);
-            saveOrder(order);
+            orderRepository.save(order);
             courierService.saveCourier(courier);
         } else
             throw new IllegalStateException("This courier is already busy or the order is unavailable");
@@ -99,12 +103,12 @@ public class OrderService {
         Courier courier = courierService.getCourier(courierId);
 
         if (order.getOrderStatus() == OrderBPM.State.IN_PROGRESS &&
-            courier.getCourierStatus() == Courier.CourierStatus.BUSY) {
+                courier.getCourierStatus() == Courier.Status.BUSY) {
 
             order.setCourier(null);
             order.setOrderStatus(OrderBPM.State.NEW);
-            courier.setCourierStatus(Courier.CourierStatus.FREE);
-            saveOrder(order);
+            courier.setCourierStatus(Courier.Status.FREE);
+            orderRepository.save(order);
             courierService.saveCourier(courier);
         } else
             throw new IllegalStateException("this courier does not have an order or " +

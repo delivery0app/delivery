@@ -26,9 +26,10 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<HttpStatus> addCustomer(@RequestBody @Valid CustomerDTO customerDTO,
                                                   BindingResult bindingResult) {
-        customerValidator.validate(convertToCustomer(customerDTO), bindingResult);
-        ErrorMessage.errorMessage(bindingResult);
-        customerService.saveCustomer(convertToCustomer(customerDTO));
+        Customer customer = convertToCustomer(customerDTO);
+        customerValidator.validate(customer, bindingResult);
+        ErrorMessage.validationError(bindingResult);
+        customerService.saveCustomer(customer);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -50,11 +51,12 @@ public class CustomerController {
                                                    BindingResult bindingResult,
                                                    @PathVariable("id") int id) {
         Customer customer = convertToCustomer(customerDTO);
-        customer.setId(id);
         customerValidator.validate(customer, bindingResult);
-        ErrorMessage.errorMessage(bindingResult);
+        ErrorMessage.validationError(bindingResult);
+        customer.setId(id);
         customerService.saveCustomer(customer);
         return ResponseEntity.ok(HttpStatus.OK);
+
     }
 
     @DeleteMapping("/{id}")

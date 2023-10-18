@@ -38,10 +38,10 @@ public class CourierController {
     @PostMapping()
     public ResponseEntity<HttpStatus> addCourier(@RequestBody @Valid CourierDTO courierDTO,
                                                  BindingResult bindingResult) {
-
-        courierValidator.validate(convertToCourier(courierDTO), bindingResult);
-        ErrorMessage.errorMessage(bindingResult);
-        courierService.saveCourier(convertToCourier(courierDTO));
+        Courier courier = convertToCourier(courierDTO);
+        courierValidator.validate(courier, bindingResult);
+        ErrorMessage.validationError(bindingResult);
+        courierService.saveCourier(courier);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -50,9 +50,9 @@ public class CourierController {
                                                   BindingResult bindingResult,
                                                   @PathVariable("id") int id) {
         Courier courier = convertToCourier(courierDTO);
-        courier.setId(id);
         courierValidator.validate(courier, bindingResult);
-        ErrorMessage.errorMessage(bindingResult);
+        ErrorMessage.validationError(bindingResult);
+        courier.setId(id);
         courierService.saveCourier(courier);
         return ResponseEntity.ok(HttpStatus.OK);
     }

@@ -50,8 +50,8 @@ public class OrderDTO {
 
     private double price;
 
-    private Courier courier;
+    private int courierId;
 
-    private Customer customer;
+    private int customerId;
 
 }
