@@ -3,8 +3,8 @@ package com.factglobal.delivery.controllers;
 import com.factglobal.delivery.dto.CustomerDTO;
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.services.CustomerService;
-import com.factglobal.delivery.util.exception_handling.ErrorMessage;
-import com.factglobal.delivery.util.validation.CustomerValidator;
+import com.factglobal.delivery.util.exception_handling.ErrorValidation;
+//import com.factglobal.delivery.util.validation.CustomerValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -21,14 +21,14 @@ import java.util.List;
 public class CustomerController {
     private final CustomerService customerService;
     private final ModelMapper modelMapper;
-    private final CustomerValidator customerValidator;
+//    private final CustomerValidator customerValidator;
 
     @PostMapping
     public ResponseEntity<HttpStatus> addCustomer(@RequestBody @Valid CustomerDTO customerDTO,
                                                   BindingResult bindingResult) {
         Customer customer = convertToCustomer(customerDTO);
-        customerValidator.validate(customer, bindingResult);
-        ErrorMessage.validationError(bindingResult);
+//        customerValidator.validate(customer, bindingResult);
+        ErrorValidation.message(bindingResult);
         customerService.saveCustomer(customer);
         return ResponseEntity.ok(HttpStatus.OK);
     }
@@ -46,18 +46,18 @@ public class CustomerController {
                 .toList();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<HttpStatus> editCustomer(@RequestBody @Valid CustomerDTO customerDTO,
-                                                   BindingResult bindingResult,
-                                                   @PathVariable("id") int id) {
-        Customer customer = convertToCustomer(customerDTO);
-        customerValidator.validate(customer, bindingResult);
-        ErrorMessage.validationError(bindingResult);
-        customer.setId(id);
-        customerService.saveCustomer(customer);
-        return ResponseEntity.ok(HttpStatus.OK);
-
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<HttpStatus> editCustomer(@RequestBody @Valid CustomerDTO customerDTO,
+//                                                   BindingResult bindingResult,
+//                                                   @PathVariable("id") int id) {
+//        Customer customer = convertToCustomer(customerDTO);
+//        customerValidator.validate(customer, bindingResult);
+//        ErrorMessage.validationError(bindingResult);
+//        customer.setCustomerId(id);
+//        customerService.saveCustomer(customer);
+//        return ResponseEntity.ok(HttpStatus.OK);
+//
+//    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteCustomer(@PathVariable("id") int id) {

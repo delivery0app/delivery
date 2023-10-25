@@ -2,6 +2,7 @@ package com.factglobal.delivery.services;
 
 
 import com.factglobal.delivery.models.Courier;
+import com.factglobal.delivery.models.User;
 import com.factglobal.delivery.repositories.CourierRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -16,11 +17,12 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class CourierService {
     private final CourierRepository courierRepository;
+    private final UserService userService;
 
     public Courier getCourier(int id) {
 
-        return courierRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Courier with id: " + id + " was not found"));
+        return courierRepository.findCourierByUserId(id)
+                .orElseThrow((() -> new EntityNotFoundException("Customer with id: " + id + " was not found")));
     }
 
     public void saveCourier(Courier courier) {
@@ -31,7 +33,7 @@ public class CourierService {
     }
 
     public void deleteCourier(int id) {
-        courierRepository.deleteById(id);
+        userService.deleteUser(id);
     }
 
     public List<Courier> getAllCourier() {

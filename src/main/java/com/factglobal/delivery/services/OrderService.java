@@ -27,6 +27,7 @@ public class OrderService {
     private final CourierService courierService;
     private final CustomerService customerService;
     private final DistanceCalculator distanceCalculator;
+    private final UserService userService;
 
 //    public void saveOrder(Order order) {
 //        if (order.getId() == 0)
@@ -34,19 +35,19 @@ public class OrderService {
 //        orderRepository.save(order);
 //    }
 
-    public void editOrder(Order order, int id) {
-        order.setId(id);
+    public void editOrder(Order order, int orderId) {
+        order.setId(orderId);
         orderRepository.save(order);
     }
 
-    public void saveOrderByCustomer(Order order, int customerId) {
+    public void saveOrder(Order order, int customerId) {
         order.setCustomer(customerService.getCustomer(customerId));
         enrichOrder(order);
         orderRepository.save(order);
     }
 
-    public void cancelOrder(int id) {
-        Order order = getOrder(id);
+    public void cancelOrder(int orderId) {
+        Order order = getOrder(orderId);
         if (order.getOrderStatus() == OrderBPM.State.NEW)
             order.setOrderStatus(OrderBPM.State.CANCELED);
         else
@@ -54,8 +55,8 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    public void deliveredOrder(int id) {
-        Order order = getOrder(id);
+    public void deliveredOrder(int orderId) {
+        Order order = getOrder(orderId);
 
         if (order.getOrderStatus() == OrderBPM.State.IN_PROGRESS)
             order.setOrderStatus(OrderBPM.State.DELIVERED);
@@ -64,9 +65,9 @@ public class OrderService {
 
     }
 
-    public Order getOrder(int id) {
-        Optional<Order> foundOrder = orderRepository.findById(id);
-        return foundOrder.orElseThrow(() -> new EntityNotFoundException("Order with this id: " + id + " does not exist"));
+    public Order getOrder(int orderId) {
+        Optional<Order> foundOrder = orderRepository.findById(orderId);
+        return foundOrder.orElseThrow(() -> new EntityNotFoundException("Order with this id: " + orderId + " does not exist"));
     }
 
     public List<Order> getAllOrders() {

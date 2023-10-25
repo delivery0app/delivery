@@ -1,10 +1,8 @@
 package com.factglobal.delivery.util.validation;
 
 import com.factglobal.delivery.models.Courier;
-import com.factglobal.delivery.repositories.CourierRepository;
 import com.factglobal.delivery.services.CourierService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;

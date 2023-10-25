@@ -6,8 +6,8 @@ import org.springframework.validation.FieldError;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ErrorMessage {
-    public static void validationError(BindingResult bindingResult) {
+public class ErrorValidation {
+    public static void message(BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             StringBuilder errorMessage = new StringBuilder();
             List<FieldError> errors = new ArrayList<>(bindingResult.getFieldErrors());
