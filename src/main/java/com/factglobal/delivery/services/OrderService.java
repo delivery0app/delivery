@@ -27,7 +27,7 @@ public class OrderService {
     private final CourierService courierService;
     private final CustomerService customerService;
     private final DistanceCalculator distanceCalculator;
-    private final UserService userService;
+//    private final UserService userService;
 
 //    public void saveOrder(Order order) {
 //        if (order.getId() == 0)

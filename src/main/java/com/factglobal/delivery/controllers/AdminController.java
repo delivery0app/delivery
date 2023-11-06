@@ -1,8 +1,11 @@
 package com.factglobal.delivery.controllers;
 
 import com.factglobal.delivery.dto.OrderDTO;
+import com.factglobal.delivery.dto.security.RegistrationAdminDTO;
 import com.factglobal.delivery.models.Order;
+import com.factglobal.delivery.models.User;
 import com.factglobal.delivery.services.OrderService;
+import com.factglobal.delivery.services.UserService;
 import com.factglobal.delivery.util.common.OrderBPM;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -18,28 +21,19 @@ import java.util.List;
 public class AdminController {
     private final OrderService orderService;
     private final ModelMapper modelMapper;
+    private final UserService userService;
 
-    @PostMapping("/couriers/{id}/ban")
-    public ResponseEntity<HttpStatus> banCourier(@PathVariable("id") int id) {
-        //TODO
+    @PostMapping("/users/{id}/block")
+    public ResponseEntity<?> blockUser(@PathVariable("id") int id) {
+        userService.blockUser(id);
+
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PostMapping("/customers/{id}/ban")
-    public ResponseEntity<HttpStatus> banCustomer(@PathVariable("id") int id) {
-        //TODO
-        return ResponseEntity.ok(HttpStatus.OK);
-    }
+    @PostMapping("/users/{id}/unblock")
+    public ResponseEntity<?> unblockUser(@PathVariable("id") int id) {
+        userService.unblockUser(id);
 
-    @DeleteMapping("/couriers/{id}/ban")
-    public ResponseEntity<HttpStatus> unbanCourier(@PathVariable("id") int id) {
-        //TODO
-        return ResponseEntity.ok(HttpStatus.OK);
-    }
-
-    @DeleteMapping("/customers/{id}/ban")
-    public ResponseEntity<HttpStatus> unbanCustomer(@PathVariable("id") int id) {
-        //TODO
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -47,6 +41,7 @@ public class AdminController {
     public List<OrderDTO> getOrdersByOrderStatus(@RequestParam(value = "status",
             required = false) String status) {
         OrderBPM.State orderStatus = OrderBPM.State.valueOf(status.toUpperCase());
+
         return orderService.getOrdersByStatus(orderStatus)
                 .stream()
                 .map(this::convertToDTO)

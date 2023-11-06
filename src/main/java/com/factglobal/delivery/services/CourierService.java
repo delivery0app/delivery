@@ -7,6 +7,9 @@ import com.factglobal.delivery.repositories.CourierRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +20,9 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class CourierService {
     private final CourierRepository courierRepository;
-    private final UserService userService;
+    @Autowired
+    @Lazy
+    private UserService userService;
 
     public Courier getCourier(int id) {
 
@@ -44,7 +49,7 @@ public class CourierService {
         return orders;
     }
 
-    private void enrichCourier(Courier courier) {
+    public void enrichCourier(Courier courier) {
         courier.setCourierStatus(Courier.Status.FREE);
     }
 
@@ -57,7 +62,15 @@ public class CourierService {
         return courierRepository.findCourierByPhoneNumber(phoneNumber).orElse(null);
     }
 
+    public void saveAndFlush(Courier courier) {
+        courierRepository.saveAndFlush(courier);
+    }
+
     public Courier getCourierByInn(String inn) {
         return courierRepository.findCourierByInn(inn).orElse(null);
+    }
+
+    public ResponseEntity<?> saveOrUpdate(Courier courier) {
+        return ResponseEntity.ok(courierRepository.save(courier));
     }
 }

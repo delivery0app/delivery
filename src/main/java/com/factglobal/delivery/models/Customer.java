@@ -34,9 +34,9 @@ public class Customer {
 //            , message = "Phone number must consist of 14 digits and match the format +7XXXХХХХХХХ")
     @Column(name = "phone_number")
     private String phoneNumber;
-//
+
 //    @Email(message = "Email should be valid")
-//    @NotEmpty(message = "Phone number should not be empty")
+//    @NotEmpty(message = "Email should not be empty")
     @Column(name = "email")
     private String email;
 

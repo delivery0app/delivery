@@ -25,18 +25,20 @@ public class User implements UserDetails {
     @Column(name = "id")
     private int id;
 
+    @Column(name = "phone_number")
     @NotBlank
-    private String username;
+    private String phoneNumber;
 
     @Column(name = "password")
     @NotBlank
-//    @Pattern(regexp = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z!@#$%^&*]{8,}"
-//            , message = "Password should contain at least one number, one lowercase and one uppercase letter, and be at least 8 characters long")
     private String password;
 
     @OneToOne(mappedBy = "user",cascade = CascadeType.PERSIST)
     @JsonIgnore
     private Customer customer;
+
+    @Column(name = "block")
+    private Boolean block;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.PERSIST)
     private Courier courier;
@@ -50,8 +52,15 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+        return roles.stream().
+                map(role -> new SimpleGrantedAuthority(role.getName())).
+                collect(Collectors.toList());
 
+    }
+
+    @Override
+    public String getUsername() {
+        return this.phoneNumber;
     }
 
     @Override
@@ -61,7 +70,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return block;
     }
 
     @Override

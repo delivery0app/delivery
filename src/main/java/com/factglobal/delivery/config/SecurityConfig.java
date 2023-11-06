@@ -26,28 +26,10 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
-
-//@RequiredArgsConstructor
-
+@RequiredArgsConstructor
 public class SecurityConfig {
-    private UserService userService;
-    private JwtFilter jwtFilter;
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
-
-    @Autowired
-    public void setJwtRequestFilter(JwtFilter jwtFilter) {
-        this.jwtFilter = jwtFilter;
-    }
-
-    @Autowired
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final UserService userService;
+    private final JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -56,9 +38,9 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable) // TODO
                 .authorizeHttpRequests(authorize -> authorize
 
-                        .requestMatchers(new AntPathRequestMatcher("/customers/**")).hasRole("CUSTOMER")
-                        .requestMatchers(new AntPathRequestMatcher("/courier/**")).hasRole("COURIER")
-                        .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
+                        .requestMatchers(new AntPathRequestMatcher("/customers/**")).hasAnyRole("CUSTOMER","ADMIN")
+                        .requestMatchers(new AntPathRequestMatcher("/couriers/**")).hasRole("COURIER")
+                        .requestMatchers(new AntPathRequestMatcher("/admins/**")).hasRole("ADMIN")
                         .requestMatchers(new AntPathRequestMatcher("/orders/**")).authenticated()
                         .anyRequest().permitAll()
                 )
@@ -77,7 +59,7 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
         daoAuthenticationProvider.setUserDetailsService(userService);
         return daoAuthenticationProvider;
     }
@@ -86,4 +68,9 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }

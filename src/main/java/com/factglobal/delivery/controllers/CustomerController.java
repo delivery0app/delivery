@@ -3,16 +3,20 @@ package com.factglobal.delivery.controllers;
 import com.factglobal.delivery.dto.CustomerDTO;
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.services.CustomerService;
+import com.factglobal.delivery.services.UserService;
 import com.factglobal.delivery.util.exception_handling.ErrorValidation;
-//import com.factglobal.delivery.util.validation.CustomerValidator;
+import com.factglobal.delivery.util.validation.CustomerValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -21,23 +25,16 @@ import java.util.List;
 public class CustomerController {
     private final CustomerService customerService;
     private final ModelMapper modelMapper;
-//    private final CustomerValidator customerValidator;
+    private final UserService userService;
+    private final CustomerValidator customerValidator;
 
-    @PostMapping
-    public ResponseEntity<HttpStatus> addCustomer(@RequestBody @Valid CustomerDTO customerDTO,
-                                                  BindingResult bindingResult) {
-        Customer customer = convertToCustomer(customerDTO);
-//        customerValidator.validate(customer, bindingResult);
-        ErrorValidation.message(bindingResult);
-        customerService.saveCustomer(customer);
-        return ResponseEntity.ok(HttpStatus.OK);
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @GetMapping("/info")
+    public CustomerDTO getCustomer(Principal principal) {
+        return convertToCustomerDTO(customerService.getCustomerByPhoneNumber(principal.getName()));
     }
 
-    @GetMapping("/{id}")
-    public CustomerDTO getCustomer(@PathVariable("id") int id) {
-        return convertToCustomerDTO(customerService.getCustomer(id));
-    }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping()
     public List<CustomerDTO> getAllCustomers() {
         return customerService.getAllCustomers()
@@ -46,23 +43,45 @@ public class CustomerController {
                 .toList();
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<HttpStatus> editCustomer(@RequestBody @Valid CustomerDTO customerDTO,
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @PutMapping("/{user_id}")
+//    public ResponseEntity<?> editCustomerByAdmin(@RequestBody @Valid CustomerDTO customerDTO,
 //                                                   BindingResult bindingResult,
-//                                                   @PathVariable("id") int id) {
+//                                                   @PathVariable("user_id") int id) {
 //        Customer customer = convertToCustomer(customerDTO);
+//        customer.setId(id);
 //        customerValidator.validate(customer, bindingResult);
-//        ErrorMessage.validationError(bindingResult);
-//        customer.setCustomerId(id);
-//        customerService.saveCustomer(customer);
-//        return ResponseEntity.ok(HttpStatus.OK);
+//        ErrorValidation.message(bindingResult);
 //
+//        return customerService.saveOrUpdate(customer);
+//    }
+//
+//    @PreAuthorize("hasRole('CUSTOMER')")
+//    @PutMapping
+//    public ResponseEntity<?> editCustomer(@RequestBody @Valid CustomerDTO customerDTO,
+//                                                   BindingResult bindingResult,
+//                                                   Principal principal) {
+//        Customer customer = convertToCustomer(customerDTO);
+//        customer.setId(customerService.getCustomerByPhoneNumber(principal.getName()).getId());
+//        customerValidator.validate(customer, bindingResult);
+//        ErrorValidation.message(bindingResult);
+//
+//        return customerService.saveOrUpdate(customer);
 //    }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteCustomer(@PathVariable("id") int id) {
-        customerService.deleteCustomer(id);
-        return ResponseEntity.ok(HttpStatus.OK);
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{user_id}")
+    public ResponseEntity<?> deleteCustomerByAdmin(@PathVariable("user_id") int id) {
+        return userService.deleteUser(id);
+    }
+
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @DeleteMapping
+    public ResponseEntity<?> deleteCustomer(Principal principal) {
+        ResponseEntity<?> response = userService.deleteUser(userService.findByPhoneNumber(principal.getName()).orElse(null).getId());
+        SecurityContextHolder.clearContext();
+
+        return response;
     }
 
     private Customer convertToCustomer(CustomerDTO customerDTO) {

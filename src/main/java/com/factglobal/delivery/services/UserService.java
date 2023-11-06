@@ -1,16 +1,18 @@
 package com.factglobal.delivery.services;
 
+import com.factglobal.delivery.dto.security.RegistrationAdminDTO;
 import com.factglobal.delivery.dto.security.RegistrationCourierDto;
 import com.factglobal.delivery.dto.security.RegistrationCustomerDto;
 import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.models.User;
-import com.factglobal.delivery.repositories.CourierRepository;
-import com.factglobal.delivery.repositories.CustomerRepository;
 import com.factglobal.delivery.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,75 +30,107 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
-    private final CourierRepository courierRepository;
-    private final CustomerRepository customerRepository;
+    private final CourierService courierService;
+    private final CustomerService customerService;
     private final RoleService roleService;
-    private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
+    @Autowired
+    @Lazy
+    private PasswordEncoder passwordEncoder;
 
     public User findById(int userId) {
-        return userRepository.findById(userId).orElseThrow((() -> new EntityNotFoundException("Customer with id: " + userId + " was not found")));
+        return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(
+                "User with id: " + userId + " was not found"
+        ));
     }
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(
-                String.format("User '%s' not found", username)
+    public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
+        User user = findByPhoneNumber(phoneNumber).orElseThrow(() -> new UsernameNotFoundException(
+                String.format("User with phone number:'%s' not found", phoneNumber)
         ));
+
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList())
+                user.getRoles().stream().
+                        map(role -> new SimpleGrantedAuthority(role.getName())).
+                        collect(Collectors.toList())
         );
     }
 
-    private User createAndSaveUser(String username, String password, String role) {
+    private User createAndSaveUser(String phoneNumber, String password, String role) {
         User user = new User();
-        user.setUsername(username);
+        user.setPhoneNumber(phoneNumber);
         user.setPassword(passwordEncoder.encode(password));
         user.setRoles(Set.of(roleService.getUserRole(role)));
+        user.setBlock(true);
+
         return userRepository.saveAndFlush(user);
     }
 
     public User createNewCourier(RegistrationCourierDto registrationCourierDto) {
-        User savedUser = createAndSaveUser(registrationCourierDto.getUsername(), registrationCourierDto.getPassword(), "ROLE_COURIER");
+        User savedUser = createAndSaveUser(registrationCourierDto.getPhoneNumber(), registrationCourierDto.getPassword(), "ROLE_COURIER");
 
-        Courier courier = new Courier();
-        courier.setInn(registrationCourierDto.getInn());
-        courier.setPhoneNumber(registrationCourierDto.getPhoneNumber());
-        courier.setEmail(registrationCourierDto.getEmail());
-        courier.setName(registrationCourierDto.getName());
+        Courier courier = converterToCourier(registrationCourierDto);
         courier.setUser(savedUser);
-        courier.setCourierStatus(Courier.Status.FREE);
-
-        courierRepository.saveAndFlush(courier);
+        courierService.enrichCourier(courier);
+        courierService.saveAndFlush(courier);
 
         savedUser.setCourier(courier);
 
         return userRepository.save(savedUser);
     }
 
+    public User createNewAdmin(RegistrationAdminDTO registrationAdminDTO) {
+        return createAndSaveUser(
+                registrationAdminDTO.getPhoneNumber(),
+                registrationAdminDTO.getPassword(),
+                "ROLE_ADMIN"
+        );
+    }
+
     public User createNewCustomer(RegistrationCustomerDto registrationCustomerDto) {
-        User savedUser = createAndSaveUser(registrationCustomerDto.getUsername(), registrationCustomerDto.getPassword(), "ROLE_CUSTOMER");
+        User savedUser = createAndSaveUser(registrationCustomerDto.getPhoneNumber(), registrationCustomerDto.getPassword(), "ROLE_CUSTOMER");
 
-        Customer customer = new Customer();
-        customer.setPhoneNumber(registrationCustomerDto.getPhoneNumber());
-        customer.setEmail(registrationCustomerDto.getEmail());
-        customer.setName(registrationCustomerDto.getName());
+        Customer customer = converterToCustomer(registrationCustomerDto);
         customer.setUser(savedUser);
-
-        customerRepository.saveAndFlush(customer);
+        customerService.saveAndFlush(customer);
 
         savedUser.setCustomer(customer);
 
         return userRepository.save(savedUser);
     }
 
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public void blockUser(int id) {
+        User user = findById(id);
+        user.setBlock(false);
+        userRepository.saveAndFlush(user);
     }
 
-    public void deleteUser(int userId) {
-        userRepository.deleteById(userId);
+    public void unblockUser(int id) {
+        User user = findById(id);
+        user.setBlock(true);
+        userRepository.saveAndFlush(user);
+    }
+
+    public Optional<User> findByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber);
+    }
+
+    public ResponseEntity<?> deleteUser(int id) {
+        String phoneNumber = findById(id).getPhoneNumber();
+        userRepository.deleteById(id);
+
+        return ResponseEntity.ok().body("User with phone number:" + phoneNumber + " is delete");
+    }
+
+    private Courier converterToCourier(RegistrationCourierDto registrationCourierDto) {
+        return modelMapper.map(registrationCourierDto, Courier.class);
+    }
+
+    private Customer converterToCustomer(RegistrationCustomerDto registrationCustomerDto) {
+        return modelMapper.map(registrationCustomerDto, Customer.class);
     }
 }
