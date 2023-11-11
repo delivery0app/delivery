@@ -2,9 +2,12 @@ package com.factglobal.delivery.controllers;
 
 import com.factglobal.delivery.dto.OrderDTO;
 import com.factglobal.delivery.models.Order;
+import com.factglobal.delivery.services.CourierService;
+import com.factglobal.delivery.services.CustomerService;
 import com.factglobal.delivery.services.OrderService;
+import com.factglobal.delivery.services.UserService;
+import com.factglobal.delivery.util.common.Mapper;
 import com.factglobal.delivery.util.common.OrderBPM;
-import com.factglobal.delivery.util.exception_handling.ErrorValidation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -14,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,101 +26,128 @@ import java.util.stream.Collectors;
 @RequestMapping("/orders")
 public class OrderController {
     private final OrderService orderService;
-    private final ModelMapper modelMapper;
+    private final CustomerService customerService;
+    private final CourierService courierService;
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<OrderDTO> getAllOrders() {
-        return orderService.getAllOrders().stream()
-                .map(this::convertToOrderDTO).collect(Collectors.toList());
-    }
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{id}")
-    public OrderDTO getOrder(@PathVariable("id") int id) {
-        return convertToOrderDTO(orderService.getOrder(id));
+        return orderService.findAllOrders();
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('CUSTOMER')")
-    @PostMapping("/customers/{customers_id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{order_id}")
+    public OrderDTO getOrderDTO(@PathVariable("order_id") int orderId) {
+        return orderService.findOrderDTO(orderId);
+    }
+
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @PostMapping
     public ResponseEntity<HttpStatus> createOrder(@RequestBody @Valid OrderDTO orderDTO,
                                                             BindingResult bindingResult,
-                                                            @PathVariable("customers_id") int customersId) {
-        ErrorValidation.message(bindingResult);
-        orderService.saveOrder(convertToOrder(orderDTO), customersId);
-        return ResponseEntity.ok(HttpStatus.OK);
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or hasRole('CUSTOMER')")
-    @DeleteMapping("/{order_id}")
-    public ResponseEntity<HttpStatus> deleteOrder(@PathVariable("order_id") int orderId) {
-        if (orderService.getOrder(orderId).getOrderStatus() != OrderBPM.State.NEW)
-            throw new IllegalStateException("This order cannot be delete, it is already in process");
-
-        orderService.deleteOrder(orderId);
-        return ResponseEntity.ok(HttpStatus.OK);
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or hasRole('CUSTOMER')")
-    @PutMapping("/{order_id}")
-    public ResponseEntity<HttpStatus> editOrder(@RequestBody @Valid OrderDTO orderDTO,
-                                                BindingResult bindingResult,
-                                                @PathVariable("order_id") int orderId) {
-        ErrorValidation.message(bindingResult);
-        if (orderDTO.getOrderStatus() != OrderBPM.State.NEW)
-            throw new IllegalStateException("This order cannot be changed, it is already in process");
-
-        orderService.editOrder(convertToOrder(orderDTO), orderId);
-        return ResponseEntity.ok(HttpStatus.OK);
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or hasRole('CUSTOMER')")
-    @GetMapping("/customers/{customer_id}")
-    public List<OrderDTO> getOrdersByCustomer(@PathVariable("customer_id") int customerId) {
-        return orderService.getOrdersByCustomer(customerId).stream()
-                .map(this::convertToOrderDTO).collect(Collectors.toList());
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or hasRole('COURIER')")
-    @GetMapping("/couriers/{courier_id}")
-    public List<OrderDTO> getOrdersByCourier(@PathVariable("courier_id") int courierId) {
-        return orderService.getOrdersByCourier(courierId).stream()
-                .map(this::convertToOrderDTO).collect(Collectors.toList());
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or hasRole('CUSTOMER')")
-    @PutMapping("/{order_id}/cancel")
-    public ResponseEntity<HttpStatus> cancelOrder(@PathVariable("order_id") int orderId) {
-        orderService.cancelOrder(orderId);
-        return ResponseEntity.ok(HttpStatus.OK);
+                                                            Principal principal) {
+        return orderService.saveOrder(orderDTO, customerService.findCustomerByPhoneNumber(principal.getName()).getId(), bindingResult);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{order_id}/delivered")
-    public ResponseEntity<HttpStatus> deliveredOrder(@PathVariable("order_id") int orderId) {
-        orderService.deliveredOrder(orderId);
-        return ResponseEntity.ok(HttpStatus.OK);
+    @DeleteMapping("/{order_id}")
+    public ResponseEntity<?> deleteOrder(@PathVariable("order_id") int orderId) {
+        return orderService.deleteOrder(orderId);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('COURIER')")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{order_id}/admin")
+    public ResponseEntity<?> editOrderByAdmin(@RequestBody @Valid OrderDTO orderDTO,
+                                                BindingResult bindingResult,
+                                                @PathVariable("order_id") int orderId) {
+        return orderService.editOrderByAdmin(orderDTO, orderId, bindingResult);
+    }
+
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @PutMapping("/{order_id}")
+    public ResponseEntity<?> editOrderByCustomer(@RequestBody @Valid OrderDTO orderDTO,
+                                       BindingResult bindingResult,
+                                       @PathVariable("order_id") int orderId,
+                                       Principal principal) {
+        return orderService.editOrderByCustomer(orderDTO, orderId, bindingResult, principal);
+    }
+
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @GetMapping("/customers")
+    public List<OrderDTO> getOrdersByCustomer(Principal principal) {
+        return orderService.findOrdersByCustomer(customerService.findCustomerByPhoneNumber(principal.getName()).getId());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/customers/{customer_id}")
+    public List<OrderDTO> getOrdersByCustomerByAdmin(@PathVariable("customer_id") int customerId) {
+        return orderService.findOrdersByCustomer(customerId);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/couriers/{courier_id}")
+    public List<OrderDTO> getOrdersByCourierByAdmin(@PathVariable("courier_id") int courierId) {
+        return orderService.findOrdersByCourier(courierId);
+    }
+
+    @PreAuthorize("hasRole('COURIER')")
+    @GetMapping("/couriers")
+    public List<OrderDTO> getOrdersByCourier(Principal principal) {
+        return orderService.findOrdersByCourier(courierService.findCourierByPhoneNumber(principal.getName()).getId());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{order_id}/cancel/admin")
+    public ResponseEntity<HttpStatus> cancelOrderByAdmin(@PathVariable("order_id") int orderId) {
+        return orderService.cancelOrderByAdmin(orderId);
+    }
+
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @PutMapping("/{order_id}/cancel")
+    public ResponseEntity<?> cancelOrderByCustomer(@PathVariable("order_id") int orderId,
+                                                  Principal principal) {
+        return orderService.cancelOrderByCustomer(orderId, principal);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{order_id}/delivered/admin")
+    public ResponseEntity<HttpStatus> deliveredOrderByAdmin(@PathVariable("order_id") int orderId) {
+        return orderService.deliveredOrder(orderId);
+    }
+
+    @PreAuthorize("hasRole('COURIER')")
+    @PutMapping("/{order_id}/delivered")
+    public ResponseEntity<?> deliveredOrderByCourier(@PathVariable("order_id") int orderId,
+                                                              Principal principal) {
+        return orderService.deliveredOrder(orderId, principal);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{order_id}/couriers/{courier_id}/assign")
-    public ResponseEntity<HttpStatus> assignCourierForOrder(@PathVariable("order_id") int orderId,
+    public ResponseEntity<?> assignCourierForOrderByAdmin(@PathVariable("order_id") int orderId,
                                                             @PathVariable("courier_id") int courierId) {
-        orderService.assignCourierToOrder(orderId, courierId);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return orderService.assignCourierToOrder(orderId, courierId);
+    }
+
+    @PreAuthorize("hasRole('COURIER')")
+    @PutMapping("/{order_id}/couriers/assign")
+    public ResponseEntity<?> assignCourierForOrderByCourier(@PathVariable("order_id") int orderId,
+                                                            Principal principal) {
+        return orderService.assignCourierToOrder(orderId, courierService.findCourierByPhoneNumber(principal.getName()).getId());
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("{order_id}/couriers/{courier_id}/release")
-    public ResponseEntity<HttpStatus> releaseCourierFromOrder(@PathVariable("order_id") int orderId,
+    public ResponseEntity<?> releaseCourierFromOrder(@PathVariable("order_id") int orderId,
                                                               @PathVariable("courier_id") int courierId) {
-        orderService.releaseCourierFromOrder(orderId, courierId);
-        return ResponseEntity.ok(HttpStatus.OK);
+
+        return orderService.releaseCourierFromOrder(orderId, courierId);
     }
 
-    private Order convertToOrder(OrderDTO orderDTO) {
-        return modelMapper.map(orderDTO, Order.class);
-    }
-
-    private OrderDTO convertToOrderDTO(Order order) {
-        return modelMapper.map(order, OrderDTO.class);
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/status")
+    public List<OrderDTO> getOrdersByOrderStatus(@RequestParam(value = "status",
+                                                required = false) String status) {
+        return orderService.findOrdersByStatus(status);
     }
 }

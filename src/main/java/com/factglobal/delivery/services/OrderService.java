@@ -1,22 +1,28 @@
 package com.factglobal.delivery.services;
 
+import com.factglobal.delivery.dto.OrderDTO;
 import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.models.Order;
 import com.factglobal.delivery.repositories.OrderRepository;
 import com.factglobal.delivery.util.common.DistanceCalculator;
+import com.factglobal.delivery.util.common.Mapper;
 import com.factglobal.delivery.util.common.OrderBPM;
+import com.factglobal.delivery.util.exception_handling.ErrorValidation;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 
 @Service
@@ -27,64 +33,156 @@ public class OrderService {
     private final CourierService courierService;
     private final CustomerService customerService;
     private final DistanceCalculator distanceCalculator;
-    private final UserService userService;
+    private final Mapper mapper;
 
-//    public void saveOrder(Order order) {
-//        if (order.getId() == 0)
-//            enrichOrder(order);
-//        orderRepository.save(order);
-//    }
+    public ResponseEntity<HttpStatus> saveOrder(OrderDTO orderDTO, int customerId, BindingResult bindingResult) {
+        ErrorValidation.message(bindingResult);
 
-    public void editOrder(Order order, int orderId) {
-        order.setId(orderId);
+        Order order = mapper.convertToOrder(orderDTO);
+        order.setCustomer(customerService.findCustomer(customerId));
+        enrichOrderFromNew(order);
         orderRepository.save(order);
+
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    public void saveOrder(Order order, int customerId) {
-        order.setCustomer(customerService.getCustomer(customerId));
-        enrichOrder(order);
-        orderRepository.save(order);
+    public ResponseEntity<?> editOrderByAdmin(OrderDTO orderDTO, int orderId, BindingResult bindingResult) {
+        ErrorValidation.message(bindingResult);
+        Order orderOld = findOrder(orderId);
+
+        Order orderNew = mapper.convertToOrder(orderDTO);
+        orderNew.setId(orderId);
+        enrichOrderFromEdit(orderNew, orderOld);
+        orderRepository.save(orderNew);
+
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    public void cancelOrder(int orderId) {
-        Order order = getOrder(orderId);
-        if (order.getOrderStatus() == OrderBPM.State.NEW)
-            order.setOrderStatus(OrderBPM.State.CANCELED);
-        else
-            throw new IllegalStateException("The order status is: " + order.getOrderStatus() + " and cannot be canceled");
-        orderRepository.save(order);
-    }
+    public ResponseEntity<?> editOrderByCustomer(OrderDTO orderDTO, int orderId, BindingResult bindingResult, Principal principal) {
+        ErrorValidation.message(bindingResult);
+        Order orderOld = findOrder(orderId);
 
-    public void deliveredOrder(int orderId) {
-        Order order = getOrder(orderId);
+        Customer customer = customerService.findCustomerByPhoneNumber(principal.getName());
+        List<Order> orders = orderRepository.findOrdersByCustomerId(customer.getId());
 
-        if (order.getOrderStatus() == OrderBPM.State.IN_PROGRESS)
-            order.setOrderStatus(OrderBPM.State.DELIVERED);
-        else
-            throw new IllegalStateException("The order status is: " + order.getOrderStatus() + ", but should be in progress");
+        for (Order order : orders) {
+            if (order.getId() == orderId) {
 
-    }
+                if (order.getOrderStatus() != OrderBPM.State.NEW)
+                    throw new IllegalStateException("This order cannot be changed, it is already in process");
 
-    public Order getOrder(int orderId) {
-        Optional<Order> foundOrder = orderRepository.findById(orderId);
-        return foundOrder.orElseThrow(() -> new EntityNotFoundException("Order with this id: " + orderId + " does not exist"));
-    }
+                Order orderNew = mapper.convertToOrder(orderDTO);
+                orderNew.setId(orderId);
+                enrichOrderFromEdit(orderNew, orderOld);
+                orderRepository.save(orderNew);
 
-    public List<Order> getAllOrders() {
-        List<Order> orders = orderRepository.findAll();
-        if (orders.isEmpty()) {
-            throw new NoSuchElementException();
+                return ResponseEntity.ok(HttpStatus.OK);
+            }
         }
-        return orders;
+
+        return new ResponseEntity<>("This customer:" + customer.getName() + " does not have this order",HttpStatus.BAD_REQUEST);
     }
 
-    public void deleteOrder(int id) {
-        orderRepository.deleteById(id);
+    public ResponseEntity<HttpStatus> cancelOrderByAdmin(int orderId) {
+        Order order = findOrder(orderId);
+        order.setOrderStatus(OrderBPM.State.CANCELED);
+        orderRepository.save(order);
+
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    public void assignCourierToOrder(int orderId, int courierId) {
-        Order order = getOrder(orderId);
-        Courier courier = courierService.getCourier(courierId);
+    public ResponseEntity<?> cancelOrderByCustomer(int orderId, Principal principal) {
+        Customer customer = customerService.findCustomerByPhoneNumber(principal.getName());
+        List<Order> orders = orderRepository.findOrdersByCustomerId(customer.getId());
+        findOrder(orderId);
+
+        for (Order order : orders) {
+            if (order.getId() == orderId) {
+
+                if (order.getOrderStatus() == OrderBPM.State.NEW)
+                    order.setOrderStatus(OrderBPM.State.CANCELED);
+                else
+                    throw new IllegalStateException("The order status is: " + order.getOrderStatus() + " and cannot be canceled");
+
+                orderRepository.save(order);
+
+                return ResponseEntity.ok(HttpStatus.OK);
+            }
+        }
+
+        return new ResponseEntity<>("This customer:" + customer.getName() + " does not have this order", HttpStatus.BAD_REQUEST);
+    }
+
+
+    public ResponseEntity<HttpStatus> deliveredOrder(int orderId) {
+        Order order = findOrder(orderId);
+        order.setOrderStatus(OrderBPM.State.DELIVERED);
+        orderRepository.save(order);
+
+        return ResponseEntity.ok(HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> deliveredOrder(int orderId, Principal principal) {
+        Courier courier = courierService.findCourierByEmail(principal.getName());
+        List<Order> orders = orderRepository.findOrdersByCourierId(courier.getId());
+
+        for (Order order : orders) {
+            if (order.getId() == orderId) {
+
+                if (order.getOrderStatus() == OrderBPM.State.IN_PROGRESS)
+                    order.setOrderStatus(OrderBPM.State.DELIVERED);
+                else
+                    throw new IllegalStateException("The order status is: " + order.getOrderStatus() + ", but should be in progress");
+
+                orderRepository.save(order);
+
+                return ResponseEntity.ok(HttpStatus.OK);
+            }
+        }
+
+        return new ResponseEntity<>("This courier:" + courier.getName() + " does not have this order",HttpStatus.BAD_REQUEST);
+    }
+
+    public OrderDTO findOrderDTO(int orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order with this id: " + orderId + " does not exist"));
+
+        return mapper.convertToOrderDTO(order);
+    }
+
+    public Order findOrder(int orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order with this id: " + orderId + " does not exist"));
+    }
+
+    public List<OrderDTO> findAllOrders() {
+        List<OrderDTO> ordersDTO = orderRepository.findAll()
+                .stream()
+                .map(mapper::convertToOrderDTO)
+                .toList();
+
+        if (ordersDTO.isEmpty()) {
+            throw new NoSuchElementException("No orders have been created yet");
+        }
+
+        return ordersDTO;
+    }
+
+    public ResponseEntity<?> deleteOrder(int id) {
+        Order order = findOrder(id);
+
+        if (order.getOrderStatus() == OrderBPM.State.DELIVERED
+                || order.getOrderStatus() == OrderBPM.State.IN_PROGRESS)
+            throw new IllegalStateException("This order cannot be delete, it is already in process");
+
+        orderRepository.delete(order);
+
+        return ResponseEntity.ok("Order with id:" + id + " is delete");
+    }
+
+    public ResponseEntity<?> assignCourierToOrder(int orderId, int courierId) {
+        Order order = findOrder(orderId);
+        Courier courier = courierService.findCourier(courierId);
 
         if (courier.getCourierStatus() == Courier.Status.FREE &&
                 order.getOrderStatus() == OrderBPM.State.NEW) {
@@ -93,15 +191,16 @@ public class OrderService {
             courier.setCourierStatus(Courier.Status.BUSY);
             order.setOrderStatus(OrderBPM.State.IN_PROGRESS);
             orderRepository.save(order);
-            courierService.saveCourier(courier);
+            courierService.saveAndFlush(courier);
         } else
             throw new IllegalStateException("This courier is already busy or the order is unavailable");
 
+        return ResponseEntity.ok("This courier:" + courier.getName() + "assigned to order" + orderId);
     }
 
-    public void releaseCourierFromOrder(int orderId, int courierId) {
-        Order order = getOrder(orderId);
-        Courier courier = courierService.getCourier(courierId);
+    public ResponseEntity<?> releaseCourierFromOrder(int orderId, int courierId) {
+        Order order = findOrder(orderId);
+        Courier courier = courierService.findCourier(courierId);
 
         if (order.getOrderStatus() == OrderBPM.State.IN_PROGRESS &&
                 courier.getCourierStatus() == Courier.Status.BUSY) {
@@ -110,37 +209,51 @@ public class OrderService {
             order.setOrderStatus(OrderBPM.State.NEW);
             courier.setCourierStatus(Courier.Status.FREE);
             orderRepository.save(order);
-            courierService.saveCourier(courier);
+            courierService.saveAndFlush(courier);
         } else
             throw new IllegalStateException("this courier does not have an order or " +
                     "the order is either new or completed");
+
+        return ResponseEntity.ok("This courier:" + courier.getName() + " is release");
     }
 
-    public List<Order> getOrdersByCourier(int courierId) {
-        Courier courier = courierService.getCourier(courierId);
-        List<Order> orders = orderRepository.findOrdersByCourier(courier);
-        if (orders.isEmpty()) {
+    public List<OrderDTO> findOrdersByCourier(int courierId) {
+        List<OrderDTO> ordersDTO = orderRepository.findOrdersByCourierId(courierId)
+                .stream()
+                .map(mapper::convertToOrderDTO)
+                .toList();
+
+        if (ordersDTO.isEmpty()) {
             throw new NoSuchElementException("This courier has no orders");
         }
-        return orders;
+
+        return ordersDTO;
     }
 
-    public List<Order> getOrdersByCustomer(int customerId) {
-        Customer customer = customerService.getCustomer(customerId);
+    public List<OrderDTO> findOrdersByCustomer(int customerId) {
+        List<OrderDTO> ordersDTO = orderRepository.findOrdersByCustomerId(customerId)
+                .stream()
+                .map(mapper::convertToOrderDTO)
+                .toList();
 
-        List<Order> orders = orderRepository.findOrdersByCustomer(customer);
-
-        if (orders.isEmpty())
+        if (ordersDTO.isEmpty())
             throw new NoSuchElementException("This customer has no orders");
-        return orders;
+
+        return ordersDTO;
     }
 
-    public List<Order> getOrdersByStatus(OrderBPM.State orderStatus) {
+    public List<OrderDTO> findOrdersByStatus(String status) {
+        OrderBPM.State orderStatus = OrderBPM.State.valueOf(status.toUpperCase());
 
-        List<Order> orders = orderRepository.findOrdersByOrderStatus(orderStatus);
+        List<OrderDTO> orders = orderRepository.findOrdersByOrderStatus(orderStatus)
+                .stream()
+                .map(mapper::convertToOrderDTO)
+                .toList();
+
         if (orders.isEmpty()) {
             throw new NoSuchElementException("This status has no orders");
         }
+
         return orders;
     }
 
@@ -151,9 +264,9 @@ public class OrderService {
 
         if (weight > 10) {
             coefficientWeigth = 2;
-        } else if (weight <= 10 && weight >= 5) {
+        } else if (weight >= 5) {
             coefficientWeigth = 1.5;
-        } else if (weight < 5 && weight > 2) {
+        } else if (weight > 2) {
             coefficientWeigth = 1.3;
         }
 
@@ -165,7 +278,7 @@ public class OrderService {
         return price;
     }
 
-    private void enrichOrder(Order order) {
+    private void enrichOrderFromNew(Order order) {
         try {
             order.setDistance(distanceCalculator.getDistance(order.getSenderAddress(), order.getDeliveryAddress()));
         } catch (IOException e) {
@@ -175,5 +288,18 @@ public class OrderService {
         order.setPrice(Math.ceil(calculateShippingCost(order) * Math.pow(10, 2)) / Math.pow(10, 2));
         order.setCreationDate(LocalDateTime.now());
         order.setDeliveryDate(LocalDate.now().plusDays(10));
+    }
+
+    private void enrichOrderFromEdit(Order orderNew, Order orderOld) {
+        try {
+            orderNew.setDistance(distanceCalculator.getDistance(orderNew.getSenderAddress(), orderNew.getDeliveryAddress()));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Enter the correct city");
+        }
+        orderNew.setOrderStatus(OrderBPM.State.NEW);
+        orderNew.setPrice(Math.ceil(calculateShippingCost(orderNew) * Math.pow(10, 2)) / Math.pow(10, 2));
+        orderNew.setCreationDate(orderOld.getCreationDate());
+        orderNew.setDeliveryDate(orderOld.getDeliveryDate());
+        orderNew.setCustomer(orderOld.getCustomer());
     }
 }

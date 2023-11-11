@@ -1,9 +1,10 @@
 package com.factglobal.delivery.services;
 
 
+import com.factglobal.delivery.dto.CourierDTO;
 import com.factglobal.delivery.models.Courier;
-import com.factglobal.delivery.models.User;
 import com.factglobal.delivery.repositories.CourierRepository;
+import com.factglobal.delivery.util.common.Mapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,47 +18,56 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class CourierService {
     private final CourierRepository courierRepository;
-    private final UserService userService;
+    private final Mapper mapper;
 
-    public Courier getCourier(int id) {
-
-        return courierRepository.findCourierByUserId(id)
+    public Courier findCourier(int id) {
+        return courierRepository.findById(id)
                 .orElseThrow((() -> new EntityNotFoundException("Customer with id: " + id + " was not found")));
     }
 
-    public void saveCourier(Courier courier) {
-        if (courier.getId() == 0)
-            enrichCourier(courier);
-
-        courierRepository.save(courier);
+    public Integer findCourierByUserId(int userId) {
+        return courierRepository.findCourierByUserId(userId)
+                .orElseThrow((() -> new EntityNotFoundException("Customer with user_id: " + userId + " was not found")))
+                .getId();
     }
 
-    public void deleteCourier(int id) {
-        userService.deleteUser(id);
-    }
+    public List<CourierDTO> findAllCourier() {
+        List<CourierDTO> ordersDTO = courierRepository.findAll()
+                .stream()
+                .map(mapper::convertToCourierDTO)
+                .toList();
 
-    public List<Courier> getAllCourier() {
-        List<Courier> orders = courierRepository.findAll();
-
-        if (orders.isEmpty())
+        if (ordersDTO.isEmpty())
             throw new NoSuchElementException("No courier has been registered yet");
-        return orders;
+
+        return ordersDTO;
     }
 
-    private void enrichCourier(Courier courier) {
-        courier.setCourierStatus(Courier.Status.FREE);
+    public void saveAndFlush(Courier courier) {
+        courierRepository.saveAndFlush(courier);
     }
 
-    public Courier getCourierByEmail(String email) {
-
+    public Courier findCourierByEmail(String email) {
         return courierRepository.findCourierByEmail(email).orElse(null);
     }
 
-    public Courier getCourierByPhoneNumber(String phoneNumber) {
-        return courierRepository.findCourierByPhoneNumber(phoneNumber).orElse(null);
+    public CourierDTO findCourierDTOByPhoneNumber(String phoneNumber) {
+        Courier courier = courierRepository.findCourierByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new EntityNotFoundException("Courier with id: " + phoneNumber + " was not found"));
+
+        return mapper.convertToCourierDTO(courier);
     }
 
-    public Courier getCourierByInn(String inn) {
+    public Courier findCourierByPhoneNumber(String phoneNumber) {
+        return courierRepository.findCourierByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new EntityNotFoundException("Courier with id: " + phoneNumber + " was not found"));
+    }
+
+    public Courier findCourierByInn(String inn) {
         return courierRepository.findCourierByInn(inn).orElse(null);
+    }
+
+    public void enrichCourier(Courier courier) {
+        courier.setCourierStatus(Courier.Status.FREE);
     }
 }

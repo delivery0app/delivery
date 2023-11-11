@@ -1,7 +1,9 @@
 package com.factglobal.delivery.services;
 
+import com.factglobal.delivery.dto.CustomerDTO;
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.repositories.CustomerRepository;
+import com.factglobal.delivery.util.common.Mapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,34 +17,48 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class CustomerService {
     private final CustomerRepository customerRepository;
+    private final Mapper mapper;
 
-    public void saveCustomer(Customer customer) {
-        customerRepository.save(customer);
+    public Integer findCustomerByUserId(int userId) {
+        return customerRepository.findCustomerByUserId(userId)
+                .orElseThrow((() -> new EntityNotFoundException("User with id: " + userId + " was not found")))
+                .getId();
     }
 
-    public Customer getCustomer(int id) {
+    public Customer findCustomer(int id) {
         return customerRepository.findById(id)
                 .orElseThrow((() -> new EntityNotFoundException("Customer with id: " + id + " was not found")));
     }
 
-    public void deleteCustomer(int id) {
-        customerRepository.deleteById(id);
-    }
+    public List<CustomerDTO> findAllCustomers() {
+        List<CustomerDTO> customersDTO = customerRepository.findAll()
+                .stream()
+                .map(mapper::convertToCustomerDTO)
+                .toList();
 
-    public List<Customer> getAllCustomers() {
-        List<Customer> customers = customerRepository.findAll();
-
-        if (customers.isEmpty())
+        if (customersDTO.isEmpty())
             throw new NoSuchElementException("No customer has been registered yet");
 
-        return customers;
+        return customersDTO;
     }
 
-    public Customer getCustomerByPhoneNumber(String phoneNumber) {
-        return customerRepository.findCustomerByPhoneNumber(phoneNumber).orElse(null);
+    public void saveAndFlush(Customer customer) {
+        customerRepository.saveAndFlush(customer);
     }
 
-    public Customer getCustomerByEmail(String email) {
+    public CustomerDTO findCustomerDTOByPhoneNumber(String phoneNumber) {
+        Customer customer = customerRepository.findCustomerByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new EntityNotFoundException("Customer with id: " + phoneNumber + " was not found"));
+
+        return mapper.convertToCustomerDTO(customer);
+    }
+
+    public Customer findCustomerByPhoneNumber(String phoneNumber) {
+        return customerRepository.findCustomerByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new EntityNotFoundException("Customer with id: " + phoneNumber + " was not found"));
+    }
+
+    public Customer findCustomerByEmail(String email) {
         return customerRepository.findCustomerByEmail(email).orElse(null);
     }
 }
