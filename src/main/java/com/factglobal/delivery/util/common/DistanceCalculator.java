@@ -15,23 +15,17 @@ import java.util.HashMap;
 @Component
 public class DistanceCalculator {
     private static final double EARTH_RADIUS = 6371000; // Радиус Земли в метрах
-    private double city1Lat;
-    private double city1Lon;
-    private double city2Lat;
-    private double city2Lon;
 
     public int getDistance(String city1, String city2) throws IOException{
         HashMap<String, Double> coordinateCity1 = getCoordinate(city1);
-        city1Lat = coordinateCity1.get("cityLat");
-        city1Lon = coordinateCity1.get("cityLon");
+        double city1Lat = coordinateCity1 != null ? coordinateCity1.get("cityLat") : null;
+        double city1Lon = coordinateCity1 != null ? coordinateCity1.get("cityLon") : null;
 
         HashMap<String, Double> coordinateCity2 = getCoordinate(city2);
-        city2Lat = coordinateCity2.get("cityLat");
-        city2Lon = coordinateCity2.get("cityLon");
+        double city2Lat = coordinateCity2 != null ? coordinateCity2.get("cityLat") : null;
+        double city2Lon = coordinateCity2 != null ? coordinateCity2.get("cityLon") : null;
 
-        int distance = (int) Math.round(calculateDistance(city1Lat, city1Lon, city2Lat, city2Lon));
-
-        return distance;
+        return (int) Math.round(calculateDistance(city1Lat, city1Lon, city2Lat, city2Lon));
     }
 
     //Получение координат города

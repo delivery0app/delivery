@@ -1,16 +1,18 @@
 package com.factglobal.delivery.controllers;
 
+import com.factglobal.delivery.dto.CourierDTO;
+import com.factglobal.delivery.dto.CustomerDTO;
 import com.factglobal.delivery.dto.OrderDTO;
-import com.factglobal.delivery.dto.security.RegistrationAdminDTO;
-import com.factglobal.delivery.models.Order;
-import com.factglobal.delivery.models.User;
+import com.factglobal.delivery.services.CourierService;
+import com.factglobal.delivery.services.CustomerService;
 import com.factglobal.delivery.services.OrderService;
 import com.factglobal.delivery.services.UserService;
 import com.factglobal.delivery.util.common.OrderBPM;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,36 +21,46 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/admins")
 public class AdminController {
-    private final OrderService orderService;
-    private final ModelMapper modelMapper;
     private final UserService userService;
+    private final CourierService courierService;
+    private final CustomerService customerService;
 
-    @PostMapping("/users/{id}/block")
-    public ResponseEntity<?> blockUser(@PathVariable("id") int id) {
-        userService.blockUser(id);
-
-        return ResponseEntity.ok(HttpStatus.OK);
+    @PostMapping("/users/{user_id}/block")
+    public ResponseEntity<?> blockUser(@PathVariable("user_id") int id) {
+        return userService.blockUser(id);
     }
 
-    @PostMapping("/users/{id}/unblock")
-    public ResponseEntity<?> unblockUser(@PathVariable("id") int id) {
-        userService.unblockUser(id);
-
-        return ResponseEntity.ok(HttpStatus.OK);
+    @PostMapping("/users/{user_id}/unblock")
+    public ResponseEntity<?> unblockUser(@PathVariable("user_id") int id) {
+        return userService.unblockUser(id);
     }
 
-    @GetMapping("/orders")
-    public List<OrderDTO> getOrdersByOrderStatus(@RequestParam(value = "status",
-            required = false) String status) {
-        OrderBPM.State orderStatus = OrderBPM.State.valueOf(status.toUpperCase());
-
-        return orderService.getOrdersByStatus(orderStatus)
-                .stream()
-                .map(this::convertToDTO)
-                .toList();
+    @DeleteMapping("/{user_id}")
+    public ResponseEntity<?> deleteUser(@PathVariable("user_id") int userId) {
+        return userService.deleteUser(userId);
     }
 
-    private OrderDTO convertToDTO(Order order) {
-        return modelMapper.map(order, OrderDTO.class);
+    @PutMapping("/couriers/{user_id}")
+    public ResponseEntity<?> editCourier(@RequestBody @Valid CourierDTO courierDTO,
+                                                BindingResult bindingResult,
+                                                @PathVariable("user_id") int userId) {
+        return userService.editCourier(courierDTO, userId, bindingResult);
+    }
+
+    @PutMapping("/customers/{user_id}")
+    public ResponseEntity<?> editCustomer(@RequestBody @Valid CustomerDTO customerDTO,
+                                         BindingResult bindingResult,
+                                         @PathVariable("user_id") int userId) {
+        return userService.editCustomer(customerDTO, userId, bindingResult);
+    }
+
+    @GetMapping("/couriers")
+    public List<CourierDTO> getAllCourier() {
+        return courierService.findAllCourier();
+    }
+
+    @GetMapping("/customers")
+    public List<CustomerDTO> getAllCustomer() {
+        return customerService.findAllCustomers();
     }
 }

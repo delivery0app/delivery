@@ -55,7 +55,6 @@ public class User implements UserDetails {
         return roles.stream().
                 map(role -> new SimpleGrantedAuthority(role.getName())).
                 collect(Collectors.toList());
-
     }
 
     @Override

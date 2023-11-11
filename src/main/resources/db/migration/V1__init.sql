@@ -52,10 +52,9 @@ CREATE TABLE order_table
     creation_date    TIMESTAMP    NOT NULL,
     fragile_cargo    BOOLEAN      NOT NULL,
     price            NUMERIC      NOT NULL,
-    courier_id       BIGINT       NOT NULL REFERENCES courier (id) ON DELETE SET NULL,
+    courier_id       BIGINT       REFERENCES courier (id) ON DELETE SET NULL,
     customer_id      BIGINT       NOT NULL REFERENCES customer (id) ON DELETE SET NULL
 );
 
 
 INSERT INTO role (name) VALUES ('ROLE_COURIER'), ('ROLE_CUSTOMER'), ('ROLE_ADMIN');
-

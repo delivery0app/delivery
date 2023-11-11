@@ -2,7 +2,6 @@ package com.factglobal.delivery.config;
 
 import com.factglobal.delivery.services.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -38,7 +37,7 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable) // TODO
                 .authorizeHttpRequests(authorize -> authorize
 
-                        .requestMatchers(new AntPathRequestMatcher("/customers/**")).hasAnyRole("CUSTOMER","ADMIN")
+                        .requestMatchers(new AntPathRequestMatcher("/customers/**")).hasRole("CUSTOMER")
                         .requestMatchers(new AntPathRequestMatcher("/couriers/**")).hasRole("COURIER")
                         .requestMatchers(new AntPathRequestMatcher("/admins/**")).hasRole("ADMIN")
                         .requestMatchers(new AntPathRequestMatcher("/orders/**")).authenticated()

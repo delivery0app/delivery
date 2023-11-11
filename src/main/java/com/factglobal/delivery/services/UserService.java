@@ -1,5 +1,7 @@
 package com.factglobal.delivery.services;
 
+import com.factglobal.delivery.dto.CourierDTO;
+import com.factglobal.delivery.dto.CustomerDTO;
 import com.factglobal.delivery.dto.security.RegistrationAdminDTO;
 import com.factglobal.delivery.dto.security.RegistrationCourierDto;
 import com.factglobal.delivery.dto.security.RegistrationCustomerDto;
@@ -7,9 +9,12 @@ import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.models.User;
 import com.factglobal.delivery.repositories.UserRepository;
+import com.factglobal.delivery.util.common.Mapper;
+import com.factglobal.delivery.util.exception_handling.ErrorValidation;
+import com.factglobal.delivery.util.validation.CourierValidator;
+import com.factglobal.delivery.util.validation.CustomerValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +25,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 
 
 import java.util.Optional;
@@ -33,7 +39,9 @@ public class UserService implements UserDetailsService {
     private final CourierService courierService;
     private final CustomerService customerService;
     private final RoleService roleService;
-    private final ModelMapper modelMapper;
+    private final Mapper mapper;
+    private final CourierValidator courierValidator;
+    private final CustomerValidator customerValidator;
     @Autowired
     @Lazy
     private PasswordEncoder passwordEncoder;
@@ -73,7 +81,7 @@ public class UserService implements UserDetailsService {
     public User createNewCourier(RegistrationCourierDto registrationCourierDto) {
         User savedUser = createAndSaveUser(registrationCourierDto.getPhoneNumber(), registrationCourierDto.getPassword(), "ROLE_COURIER");
 
-        Courier courier = converterToCourier(registrationCourierDto);
+        Courier courier = mapper.convertToCourier(registrationCourierDto);
         courier.setUser(savedUser);
         courierService.enrichCourier(courier);
         courierService.saveAndFlush(courier);
@@ -83,18 +91,10 @@ public class UserService implements UserDetailsService {
         return userRepository.save(savedUser);
     }
 
-    public User createNewAdmin(RegistrationAdminDTO registrationAdminDTO) {
-        return createAndSaveUser(
-                registrationAdminDTO.getPhoneNumber(),
-                registrationAdminDTO.getPassword(),
-                "ROLE_ADMIN"
-        );
-    }
-
     public User createNewCustomer(RegistrationCustomerDto registrationCustomerDto) {
         User savedUser = createAndSaveUser(registrationCustomerDto.getPhoneNumber(), registrationCustomerDto.getPassword(), "ROLE_CUSTOMER");
 
-        Customer customer = converterToCustomer(registrationCustomerDto);
+        Customer customer = mapper.convertToCustomer(registrationCustomerDto);
         customer.setUser(savedUser);
         customerService.saveAndFlush(customer);
 
@@ -103,16 +103,60 @@ public class UserService implements UserDetailsService {
         return userRepository.save(savedUser);
     }
 
-    public void blockUser(int id) {
+    public User createNewAdmin(RegistrationAdminDTO registrationAdminDTO) {
+        return createAndSaveUser(registrationAdminDTO.getPhoneNumber(), registrationAdminDTO.getPassword(), "ROLE_ADMIN");
+    }
+
+    public ResponseEntity<?> editCourier(CourierDTO courierDTO, int  userId, BindingResult bindingResult) {
+        Courier courier = mapper.convertToCourier(courierDTO);
+        User user = findById(userId);
+
+        courier.setId(courierService.findCourierByUserId(userId));
+        courierValidator.validate(courier, bindingResult);
+        ErrorValidation.message(bindingResult);
+
+        courier.setUser(user);
+        courierService.saveAndFlush(courier);
+
+        user.setPhoneNumber(courier.getPhoneNumber());
+        user.setCourier(courier);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(courier);
+    }
+
+    public ResponseEntity<?> editCustomer(CustomerDTO customerDTO, int  userId, BindingResult bindingResult) {
+        User user = findById(userId);
+        Customer customer = mapper.convertToCustomer(customerDTO);
+
+        customer.setId(customerService.findCustomerByUserId(userId));
+        customerValidator.validate(customer, bindingResult);
+        ErrorValidation.message(bindingResult);
+
+        customer.setUser(user);
+        customerService.saveAndFlush(customer);
+
+        user.setPhoneNumber(customer.getPhoneNumber());
+        user.setCustomer(customer);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(customer);
+    }
+
+    public ResponseEntity<?> blockUser(int id) {
         User user = findById(id);
         user.setBlock(false);
         userRepository.saveAndFlush(user);
+
+        return ResponseEntity.ok("This user with id:" + id + " is block");
     }
 
-    public void unblockUser(int id) {
+    public ResponseEntity<?> unblockUser(int id) {
         User user = findById(id);
         user.setBlock(true);
         userRepository.saveAndFlush(user);
+
+        return ResponseEntity.ok("This user with id:" + id + " is unblock");
     }
 
     public Optional<User> findByPhoneNumber(String phoneNumber) {
@@ -124,13 +168,5 @@ public class UserService implements UserDetailsService {
         userRepository.deleteById(id);
 
         return ResponseEntity.ok().body("User with phone number:" + phoneNumber + " is delete");
-    }
-
-    private Courier converterToCourier(RegistrationCourierDto registrationCourierDto) {
-        return modelMapper.map(registrationCourierDto, Courier.class);
-    }
-
-    private Customer converterToCustomer(RegistrationCustomerDto registrationCustomerDto) {
-        return modelMapper.map(registrationCustomerDto, Customer.class);
     }
 }

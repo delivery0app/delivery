@@ -26,7 +26,7 @@ public class CourierDTO {
             , message = "Phone number must consist of 14 digits and match the format +7XXXХХХХХХХ")
     private String phoneNumber;
 
-    @Email
+    @Email(message = "Email should be valid")
     @NotBlank(message = "Email number should not be empty")
     private String email;
 
