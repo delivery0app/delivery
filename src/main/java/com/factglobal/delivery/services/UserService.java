@@ -1,7 +1,6 @@
 package com.factglobal.delivery.services;
 
-import com.factglobal.delivery.dto.CourierDTO;
-import com.factglobal.delivery.dto.CustomerDTO;
+
 import com.factglobal.delivery.dto.security.RegistrationAdminDTO;
 import com.factglobal.delivery.dto.security.RegistrationCourierDto;
 import com.factglobal.delivery.dto.security.RegistrationCustomerDto;
@@ -10,9 +9,7 @@ import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.models.User;
 import com.factglobal.delivery.repositories.UserRepository;
 import com.factglobal.delivery.util.common.Mapper;
-import com.factglobal.delivery.util.exception_handling.ErrorValidation;
-import com.factglobal.delivery.util.validation.CourierValidator;
-import com.factglobal.delivery.util.validation.CustomerValidator;
+
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +22,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
 
 
 import java.util.Optional;

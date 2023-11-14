@@ -48,8 +48,9 @@ public class OrderController {
                                                   BindingResult bindingResult,
                                                   Principal principal) {
         ErrorValidation.message(bindingResult);
+        int customerId = customerService.findCustomerByPhoneNumber(principal.getName()).getId();
 
-        return orderService.saveOrder(orderDTO, customerService.findCustomerByPhoneNumber(principal.getName()).getId());
+        return orderService.saveOrder(mapper.convertToOrder(orderDTO), customerId);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -78,7 +79,7 @@ public class OrderController {
                                                  Principal principal) {
         ErrorValidation.message(bindingResult);
 
-        return orderService.editOrderByCustomer(orderDTO, orderId, principal);
+        return orderService.editOrderByCustomer(mapper.convertToOrder(orderDTO), orderId, principal);
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")

@@ -1,6 +1,5 @@
 package com.factglobal.delivery.services;
 
-import com.factglobal.delivery.dto.OrderDTO;
 import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.models.Order;
@@ -8,14 +7,12 @@ import com.factglobal.delivery.repositories.OrderRepository;
 import com.factglobal.delivery.util.common.DistanceCalculator;
 import com.factglobal.delivery.util.common.Mapper;
 import com.factglobal.delivery.util.common.OrderBPM;
-import com.factglobal.delivery.util.exception_handling.ErrorValidation;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -35,9 +32,8 @@ public class OrderService {
     private final DistanceCalculator distanceCalculator;
     private final Mapper mapper;
 
-    public ResponseEntity<HttpStatus> saveOrder(OrderDTO orderDTO, int customerId) {
+    public ResponseEntity<HttpStatus> saveOrder(Order order, int customerId) {
 
-        Order order = mapper.convertToOrder(orderDTO);
         order.setCustomer(customerService.findCustomer(customerId));
         enrichOrderFromNew(order);
         orderRepository.save(order);
@@ -53,8 +49,8 @@ public class OrderService {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    public ResponseEntity<?> editOrderByCustomer(OrderDTO orderDTO, int orderId, Principal principal) {
-        Order orderOld = findOrder(orderId);
+    public ResponseEntity<?> editOrderByCustomer(Order newOrder, int orderId, Principal principal) {
+        Order oldOrder = findOrder(orderId);
 
         Customer customer = customerService.findCustomerByPhoneNumber(principal.getName());
         List<Order> orders = orderRepository.findOrdersByCustomerId(customer.getId());
@@ -65,10 +61,9 @@ public class OrderService {
                 if (order.getOrderStatus() != OrderBPM.State.NEW)
                     throw new IllegalStateException("This order cannot be changed, it is already in process");
 
-                Order orderNew = mapper.convertToOrder(orderDTO);
-                orderNew.setId(orderId);
-                enrichOrderFromEdit(orderNew, orderOld);
-                orderRepository.save(orderNew);
+                newOrder.setId(orderId);
+                enrichOrderFromEdit(newOrder, oldOrder);
+                orderRepository.save(newOrder);
 
                 return ResponseEntity.ok(HttpStatus.OK);
             }

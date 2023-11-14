@@ -1,6 +1,7 @@
 package com.factglobal.delivery.controllers;
 
 import com.factglobal.delivery.dto.CustomerDTO;
+import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.services.CustomerService;
 import com.factglobal.delivery.services.UserService;
 import com.factglobal.delivery.util.common.Mapper;
@@ -27,7 +28,8 @@ public class CustomerController {
 
     @GetMapping
     public CustomerDTO getCustomer(Principal principal) {
-        return customerService.findCustomerDTOByPhoneNumber(principal.getName());
+        Customer customer = customerService.findCustomerByPhoneNumber(principal.getName());
+        return mapper.convertToCustomerDTO(customer);
     }
 
     @PutMapping

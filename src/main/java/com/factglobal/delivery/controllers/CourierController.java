@@ -1,6 +1,7 @@
 package com.factglobal.delivery.controllers;
 
 import com.factglobal.delivery.dto.CourierDTO;
+import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.services.CourierService;
 import com.factglobal.delivery.services.UserService;
 import com.factglobal.delivery.util.common.Mapper;
@@ -29,7 +30,9 @@ public class CourierController {
 
     @GetMapping
     public CourierDTO getCourier(Principal principal) {
-        return courierService.findCourierDTOByPhoneNumber(principal.getName());
+        Courier courier = courierService.findCourierByPhoneNumber(principal.getName());
+
+        return mapper.convertToCourierDTO(courier);
     }
 
     @PutMapping

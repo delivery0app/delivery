@@ -1,7 +1,6 @@
 package com.factglobal.delivery.services;
 
 
-import com.factglobal.delivery.dto.CourierDTO;
 import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.repositories.CourierRepository;
 import com.factglobal.delivery.util.common.Mapper;
@@ -48,12 +47,6 @@ public class CourierService {
         return courierRepository.findCourierByEmail(email).orElse(null);
     }
 
-    public CourierDTO findCourierDTOByPhoneNumber(String phoneNumber) {
-        Courier courier = courierRepository.findCourierByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new EntityNotFoundException("Courier with id: " + phoneNumber + " was not found"));
-
-        return mapper.convertToCourierDTO(courier);
-    }
 
     public Courier findCourierByPhoneNumber(String phoneNumber) {
         return courierRepository.findCourierByPhoneNumber(phoneNumber)

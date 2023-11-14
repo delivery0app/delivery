@@ -1,6 +1,5 @@
 package com.factglobal.delivery.services;
 
-import com.factglobal.delivery.dto.CustomerDTO;
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.repositories.CustomerRepository;
 import com.factglobal.delivery.util.common.Mapper;
@@ -43,12 +42,6 @@ public class CustomerService {
         customerRepository.saveAndFlush(customer);
     }
 
-    public CustomerDTO findCustomerDTOByPhoneNumber(String phoneNumber) {
-        Customer customer = customerRepository.findCustomerByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new EntityNotFoundException("Customer with id: " + phoneNumber + " was not found"));
-
-        return mapper.convertToCustomerDTO(customer);
-    }
 
     public Customer findCustomerByPhoneNumber(String phoneNumber) {
         return customerRepository.findCustomerByPhoneNumber(phoneNumber)
