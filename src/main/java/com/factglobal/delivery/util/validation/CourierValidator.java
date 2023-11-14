@@ -42,7 +42,7 @@ public class CourierValidator implements Validator {
             if (courierService.findCourierByInn(inn) != null && !(inn.equals(courier.getInn()))) {
                 errors.rejectValue("inn", "", "This INN number: " + inn + " is already registered");
             }
-        }else {
+        } else {
             if (courierService.findCourierByEmail(email) != null) {
                 errors.rejectValue("email", "", "This email is already taken");
             }

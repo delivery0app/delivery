@@ -38,7 +38,7 @@ public class CustomerValidator implements Validator {
                     !(phoneNumber.equals(customer.getPhoneNumber()))) {
                 errors.rejectValue("phoneNumber", "", "This phone number: " + phoneNumber + " is already taken");
             }
-        }else {
+        } else {
             if (customerService.findCustomerByEmail(email) != null) {
                 errors.rejectValue("email", "", "This email: " + email + "is already taken");
             }

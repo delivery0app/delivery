@@ -40,8 +40,7 @@ public class UserService implements UserDetailsService {
     private final CustomerService customerService;
     private final RoleService roleService;
     private final Mapper mapper;
-    private final CourierValidator courierValidator;
-    private final CustomerValidator customerValidator;
+
     @Autowired
     @Lazy
     private PasswordEncoder passwordEncoder;
@@ -107,13 +106,8 @@ public class UserService implements UserDetailsService {
         return createAndSaveUser(registrationAdminDTO.getPhoneNumber(), registrationAdminDTO.getPassword(), "ROLE_ADMIN");
     }
 
-    public ResponseEntity<?> editCourier(CourierDTO courierDTO, int  userId, BindingResult bindingResult) {
-        Courier courier = mapper.convertToCourier(courierDTO);
+    public ResponseEntity<?> editCourier(Courier courier, int userId) {
         User user = findById(userId);
-
-        courier.setId(courierService.findCourierByUserId(userId));
-        courierValidator.validate(courier, bindingResult);
-        ErrorValidation.message(bindingResult);
 
         courier.setUser(user);
         courierService.saveAndFlush(courier);
@@ -125,14 +119,8 @@ public class UserService implements UserDetailsService {
         return ResponseEntity.ok(courier);
     }
 
-    public ResponseEntity<?> editCustomer(CustomerDTO customerDTO, int  userId, BindingResult bindingResult) {
+    public ResponseEntity<?> editCustomer(Customer customer, int userId) {
         User user = findById(userId);
-        Customer customer = mapper.convertToCustomer(customerDTO);
-
-        customer.setId(customerService.findCustomerByUserId(userId));
-        customerValidator.validate(customer, bindingResult);
-        ErrorValidation.message(bindingResult);
-
         customer.setUser(user);
         customerService.saveAndFlush(customer);
 

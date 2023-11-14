@@ -16,6 +16,7 @@ import java.util.List;
 @ToString
 @Entity
 @Table(name = "customer")
+
 public class Customer {
     @Id
     @Column(name = "id")

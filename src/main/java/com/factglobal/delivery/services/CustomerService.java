@@ -30,16 +30,13 @@ public class CustomerService {
                 .orElseThrow((() -> new EntityNotFoundException("Customer with id: " + id + " was not found")));
     }
 
-    public List<CustomerDTO> findAllCustomers() {
-        List<CustomerDTO> customersDTO = customerRepository.findAll()
-                .stream()
-                .map(mapper::convertToCustomerDTO)
-                .toList();
+    public List<Customer> findAllCustomers() {
+        List<Customer> customers = customerRepository.findAll();
 
-        if (customersDTO.isEmpty())
+        if (customers.isEmpty())
             throw new NoSuchElementException("No customer has been registered yet");
 
-        return customersDTO;
+        return customers;
     }
 
     public void saveAndFlush(Customer customer) {

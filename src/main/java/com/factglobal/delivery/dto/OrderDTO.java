@@ -49,8 +49,5 @@ public class OrderDTO {
     private Boolean fragileCargo;
 
     private double price;
-//
-//    private int courierId;
-//
-//    private int customerId;
+
 }

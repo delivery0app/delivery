@@ -8,7 +8,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 @Component
-public class PasswordsMatchingCheck implements Validator {
+public class PasswordsMatching implements Validator {
     @Override
     public boolean supports(Class<?> clazz) {
         return true;
@@ -29,8 +29,8 @@ public class PasswordsMatchingCheck implements Validator {
         } else if (target instanceof RegistrationAdminDTO registrationAdminDTO) {
 
             if (!registrationAdminDTO.getPassword().equals(registrationAdminDTO.getConfirmPassword())) {
-            errors.rejectValue("confirmPassword", "", "Password mismatch");
+                errors.rejectValue("confirmPassword", "", "Password mismatch");
+            }
         }
-    }
     }
 }

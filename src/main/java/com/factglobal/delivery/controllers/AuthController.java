@@ -5,6 +5,11 @@ import com.factglobal.delivery.dto.security.RegistrationAdminDTO;
 import com.factglobal.delivery.dto.security.RegistrationCourierDto;
 import com.factglobal.delivery.dto.security.RegistrationCustomerDto;
 import com.factglobal.delivery.services.AuthService;
+import com.factglobal.delivery.util.common.Mapper;
+import com.factglobal.delivery.util.exception_handling.ErrorValidation;
+import com.factglobal.delivery.util.validation.CourierValidator;
+import com.factglobal.delivery.util.validation.CustomerValidator;
+import com.factglobal.delivery.util.validation.PasswordsMatching;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+    private final PasswordsMatching passwordsMatching;
+    private final CustomerValidator customerValidator;
+    private final CourierValidator courierValidator;
+    private final Mapper mapper;
 
     @PostMapping("/auth")
     public ResponseEntity<?> createAuthToken(@RequestBody JwtRequest authRequest) {
@@ -27,18 +36,29 @@ public class AuthController {
     @PostMapping("/registration/courier")
     public ResponseEntity<?> createNewUser(@RequestBody @Valid RegistrationCourierDto registrationCourierDto,
                                            BindingResult bindingResult) {
-        return authService.createNewCourier(registrationCourierDto, bindingResult);
+        passwordsMatching.validate(registrationCourierDto, bindingResult);
+        courierValidator.validate(mapper.convertToCourier(registrationCourierDto), bindingResult);
+        ErrorValidation.message(bindingResult);
+
+        return authService.createNewCourier(registrationCourierDto);
     }
 
     @PostMapping("/registration/customer")
     public ResponseEntity<?> createNewUser(@RequestBody @Valid RegistrationCustomerDto registrationCustomerDto,
                                            BindingResult bindingResult) {
-        return authService.createNewCustomer(registrationCustomerDto, bindingResult);
+        passwordsMatching.validate(registrationCustomerDto, bindingResult);
+        customerValidator.validate(mapper.convertToCustomer(registrationCustomerDto), bindingResult);
+        ErrorValidation.message(bindingResult);
+
+        return authService.createNewCustomer(registrationCustomerDto);
     }
 
     @PostMapping("/registration/admin")
     public ResponseEntity<?> createNewUser(@RequestBody @Valid RegistrationAdminDTO registrationAdminDTO,
-                                         BindingResult bindingResult) {
-        return authService.createNewAdmin(registrationAdminDTO, bindingResult);
+                                           BindingResult bindingResult) {
+        passwordsMatching.validate(registrationAdminDTO, bindingResult);
+        ErrorValidation.message(bindingResult);
+
+        return authService.createNewAdmin(registrationAdminDTO);
     }
 }

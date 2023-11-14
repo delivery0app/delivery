@@ -31,16 +31,13 @@ public class CourierService {
                 .getId();
     }
 
-    public List<CourierDTO> findAllCourier() {
-        List<CourierDTO> ordersDTO = courierRepository.findAll()
-                .stream()
-                .map(mapper::convertToCourierDTO)
-                .toList();
+    public List<Courier> findAllCourier() {
+        List<Courier> orders = courierRepository.findAll();
 
-        if (ordersDTO.isEmpty())
+        if (orders.isEmpty())
             throw new NoSuchElementException("No courier has been registered yet");
 
-        return ordersDTO;
+        return orders;
     }
 
     public void saveAndFlush(Courier courier) {
