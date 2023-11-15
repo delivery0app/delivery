@@ -1,6 +1,5 @@
 package com.factglobal.delivery.services;
 
-import com.factglobal.delivery.dto.OrderDTO;
 import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.models.Order;
@@ -8,14 +7,12 @@ import com.factglobal.delivery.repositories.OrderRepository;
 import com.factglobal.delivery.util.common.DistanceCalculator;
 import com.factglobal.delivery.util.common.Mapper;
 import com.factglobal.delivery.util.common.OrderBPM;
-import com.factglobal.delivery.util.exception_handling.ErrorValidation;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -35,10 +32,8 @@ public class OrderService {
     private final DistanceCalculator distanceCalculator;
     private final Mapper mapper;
 
-    public ResponseEntity<HttpStatus> saveOrder(OrderDTO orderDTO, int customerId, BindingResult bindingResult) {
-        ErrorValidation.message(bindingResult);
+    public ResponseEntity<HttpStatus> saveOrder(Order order, int customerId) {
 
-        Order order = mapper.convertToOrder(orderDTO);
         order.setCustomer(customerService.findCustomer(customerId));
         enrichOrderFromNew(order);
         orderRepository.save(order);
@@ -46,21 +41,16 @@ public class OrderService {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    public ResponseEntity<?> editOrderByAdmin(OrderDTO orderDTO, int orderId, BindingResult bindingResult) {
-        ErrorValidation.message(bindingResult);
-        Order orderOld = findOrder(orderId);
-
-        Order orderNew = mapper.convertToOrder(orderDTO);
-        orderNew.setId(orderId);
-        enrichOrderFromEdit(orderNew, orderOld);
-        orderRepository.save(orderNew);
+    public ResponseEntity<?> editOrderByAdmin(Order newOrder, int orderId) {
+        Order oldOrder = findOrder(orderId);
+        enrichOrderFromEdit(newOrder, oldOrder);
+        orderRepository.save(newOrder);
 
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    public ResponseEntity<?> editOrderByCustomer(OrderDTO orderDTO, int orderId, BindingResult bindingResult, Principal principal) {
-        ErrorValidation.message(bindingResult);
-        Order orderOld = findOrder(orderId);
+    public ResponseEntity<?> editOrderByCustomer(Order newOrder, int orderId, Principal principal) {
+        Order oldOrder = findOrder(orderId);
 
         Customer customer = customerService.findCustomerByPhoneNumber(principal.getName());
         List<Order> orders = orderRepository.findOrdersByCustomerId(customer.getId());
@@ -71,16 +61,15 @@ public class OrderService {
                 if (order.getOrderStatus() != OrderBPM.State.NEW)
                     throw new IllegalStateException("This order cannot be changed, it is already in process");
 
-                Order orderNew = mapper.convertToOrder(orderDTO);
-                orderNew.setId(orderId);
-                enrichOrderFromEdit(orderNew, orderOld);
-                orderRepository.save(orderNew);
+                newOrder.setId(orderId);
+                enrichOrderFromEdit(newOrder, oldOrder);
+                orderRepository.save(newOrder);
 
                 return ResponseEntity.ok(HttpStatus.OK);
             }
         }
 
-        return new ResponseEntity<>("This customer:" + customer.getName() + " does not have this order",HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("This customer:" + customer.getName() + " does not have this order", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<HttpStatus> cancelOrderByAdmin(int orderId) {
@@ -140,32 +129,23 @@ public class OrderService {
             }
         }
 
-        return new ResponseEntity<>("This courier:" + courier.getName() + " does not have this order",HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("This courier:" + courier.getName() + " does not have this order", HttpStatus.BAD_REQUEST);
     }
 
-    public OrderDTO findOrderDTO(int orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new EntityNotFoundException("Order with this id: " + orderId + " does not exist"));
-
-        return mapper.convertToOrderDTO(order);
-    }
 
     public Order findOrder(int orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order with this id: " + orderId + " does not exist"));
     }
 
-    public List<OrderDTO> findAllOrders() {
-        List<OrderDTO> ordersDTO = orderRepository.findAll()
-                .stream()
-                .map(mapper::convertToOrderDTO)
-                .toList();
+    public List<Order> findAllOrders() {
+        List<Order> orders = orderRepository.findAll();
 
-        if (ordersDTO.isEmpty()) {
+        if (orders.isEmpty()) {
             throw new NoSuchElementException("No orders have been created yet");
         }
 
-        return ordersDTO;
+        return orders;
     }
 
     public ResponseEntity<?> deleteOrder(int id) {
@@ -217,38 +197,30 @@ public class OrderService {
         return ResponseEntity.ok("This courier:" + courier.getName() + " is release");
     }
 
-    public List<OrderDTO> findOrdersByCourier(int courierId) {
-        List<OrderDTO> ordersDTO = orderRepository.findOrdersByCourierId(courierId)
-                .stream()
-                .map(mapper::convertToOrderDTO)
-                .toList();
+    public List<Order> findOrdersByCourier(int courierId) {
+        List<Order> orders = orderRepository.findOrdersByCourierId(courierId);
 
-        if (ordersDTO.isEmpty()) {
+        if (orders.isEmpty()) {
             throw new NoSuchElementException("This courier has no orders");
         }
 
-        return ordersDTO;
+        return orders;
     }
 
-    public List<OrderDTO> findOrdersByCustomer(int customerId) {
-        List<OrderDTO> ordersDTO = orderRepository.findOrdersByCustomerId(customerId)
-                .stream()
-                .map(mapper::convertToOrderDTO)
-                .toList();
+    public List<Order> findOrdersByCustomer(int customerId) {
+        List<Order> orders = orderRepository.findOrdersByCustomerId(customerId);
 
-        if (ordersDTO.isEmpty())
+        if (orders.isEmpty())
             throw new NoSuchElementException("This customer has no orders");
 
-        return ordersDTO;
+        return orders;
     }
 
-    public List<OrderDTO> findOrdersByStatus(String status) {
+    public List<Order> findOrdersByStatus(String status) {
         OrderBPM.State orderStatus = OrderBPM.State.valueOf(status.toUpperCase());
 
-        List<OrderDTO> orders = orderRepository.findOrdersByOrderStatus(orderStatus)
-                .stream()
-                .map(mapper::convertToOrderDTO)
-                .toList();
+        List<Order> orders = orderRepository.findOrdersByOrderStatus(orderStatus);
+
 
         if (orders.isEmpty()) {
             throw new NoSuchElementException("This status has no orders");

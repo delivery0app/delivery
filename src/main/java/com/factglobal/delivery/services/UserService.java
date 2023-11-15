@@ -1,7 +1,6 @@
 package com.factglobal.delivery.services;
 
-import com.factglobal.delivery.dto.CourierDTO;
-import com.factglobal.delivery.dto.CustomerDTO;
+
 import com.factglobal.delivery.dto.security.RegistrationAdminDTO;
 import com.factglobal.delivery.dto.security.RegistrationCourierDto;
 import com.factglobal.delivery.dto.security.RegistrationCustomerDto;
@@ -10,9 +9,7 @@ import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.models.User;
 import com.factglobal.delivery.repositories.UserRepository;
 import com.factglobal.delivery.util.common.Mapper;
-import com.factglobal.delivery.util.exception_handling.ErrorValidation;
-import com.factglobal.delivery.util.validation.CourierValidator;
-import com.factglobal.delivery.util.validation.CustomerValidator;
+
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +22,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
 
 
 import java.util.Optional;
@@ -40,8 +36,7 @@ public class UserService implements UserDetailsService {
     private final CustomerService customerService;
     private final RoleService roleService;
     private final Mapper mapper;
-    private final CourierValidator courierValidator;
-    private final CustomerValidator customerValidator;
+
     @Autowired
     @Lazy
     private PasswordEncoder passwordEncoder;
@@ -107,13 +102,8 @@ public class UserService implements UserDetailsService {
         return createAndSaveUser(registrationAdminDTO.getPhoneNumber(), registrationAdminDTO.getPassword(), "ROLE_ADMIN");
     }
 
-    public ResponseEntity<?> editCourier(CourierDTO courierDTO, int  userId, BindingResult bindingResult) {
-        Courier courier = mapper.convertToCourier(courierDTO);
+    public ResponseEntity<?> editCourier(Courier courier, int userId) {
         User user = findById(userId);
-
-        courier.setId(courierService.findCourierByUserId(userId));
-        courierValidator.validate(courier, bindingResult);
-        ErrorValidation.message(bindingResult);
 
         courier.setUser(user);
         courierService.saveAndFlush(courier);
@@ -125,14 +115,8 @@ public class UserService implements UserDetailsService {
         return ResponseEntity.ok(courier);
     }
 
-    public ResponseEntity<?> editCustomer(CustomerDTO customerDTO, int  userId, BindingResult bindingResult) {
+    public ResponseEntity<?> editCustomer(Customer customer, int userId) {
         User user = findById(userId);
-        Customer customer = mapper.convertToCustomer(customerDTO);
-
-        customer.setId(customerService.findCustomerByUserId(userId));
-        customerValidator.validate(customer, bindingResult);
-        ErrorValidation.message(bindingResult);
-
         customer.setUser(user);
         customerService.saveAndFlush(customer);
 

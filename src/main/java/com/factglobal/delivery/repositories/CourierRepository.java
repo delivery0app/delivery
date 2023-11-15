@@ -11,9 +11,7 @@ import java.util.Optional;
 @Repository
 public interface CourierRepository extends JpaRepository<Courier, Integer> {
     Optional<Courier> findCourierByPhoneNumber(String phoneNumber);
-
     Optional<Courier> findCourierByEmail(String email);
-
     Optional<Courier> findCourierByInn(String inn);
     Optional<Courier> findCourierByUserId(int id);
 }

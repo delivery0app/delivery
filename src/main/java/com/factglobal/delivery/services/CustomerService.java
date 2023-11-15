@@ -1,6 +1,5 @@
 package com.factglobal.delivery.services;
 
-import com.factglobal.delivery.dto.CustomerDTO;
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.repositories.CustomerRepository;
 import com.factglobal.delivery.util.common.Mapper;
@@ -30,28 +29,19 @@ public class CustomerService {
                 .orElseThrow((() -> new EntityNotFoundException("Customer with id: " + id + " was not found")));
     }
 
-    public List<CustomerDTO> findAllCustomers() {
-        List<CustomerDTO> customersDTO = customerRepository.findAll()
-                .stream()
-                .map(mapper::convertToCustomerDTO)
-                .toList();
+    public List<Customer> findAllCustomers() {
+        List<Customer> customers = customerRepository.findAll();
 
-        if (customersDTO.isEmpty())
+        if (customers.isEmpty())
             throw new NoSuchElementException("No customer has been registered yet");
 
-        return customersDTO;
+        return customers;
     }
 
     public void saveAndFlush(Customer customer) {
         customerRepository.saveAndFlush(customer);
     }
 
-    public CustomerDTO findCustomerDTOByPhoneNumber(String phoneNumber) {
-        Customer customer = customerRepository.findCustomerByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new EntityNotFoundException("Customer with id: " + phoneNumber + " was not found"));
-
-        return mapper.convertToCustomerDTO(customer);
-    }
 
     public Customer findCustomerByPhoneNumber(String phoneNumber) {
         return customerRepository.findCustomerByPhoneNumber(phoneNumber)

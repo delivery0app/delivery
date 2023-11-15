@@ -33,7 +33,6 @@ public class Courier  {
     @Column(name = "email")
     private String email;
 
-
     @Enumerated(EnumType.STRING)
     @Column(name = "courier_status")
     private Status courierStatus;

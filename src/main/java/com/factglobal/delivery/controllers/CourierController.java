@@ -1,8 +1,13 @@
 package com.factglobal.delivery.controllers;
 
 import com.factglobal.delivery.dto.CourierDTO;
+import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.services.CourierService;
 import com.factglobal.delivery.services.UserService;
+import com.factglobal.delivery.util.common.Mapper;
+import com.factglobal.delivery.util.exception_handling.ErrorValidation;
+import com.factglobal.delivery.util.validation.CourierValidator;
+import com.factglobal.delivery.util.validation.CustomerValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,17 +24,28 @@ import java.security.Principal;
 public class CourierController {
     private final CourierService courierService;
     private final UserService userService;
+    private final CourierValidator courierValidator;
+    private final Mapper mapper;
+
 
     @GetMapping
     public CourierDTO getCourier(Principal principal) {
-        return courierService.findCourierDTOByPhoneNumber(principal.getName());
+        Courier courier = courierService.findCourierByPhoneNumber(principal.getName());
+
+        return mapper.convertToCourierDTO(courier);
     }
 
     @PutMapping
     public ResponseEntity<?> editCourier(@RequestBody @Valid CourierDTO courierDTO,
                                          BindingResult bindingResult,
                                          Principal principal) {
-        ResponseEntity<?> response = userService.editCourier(courierDTO, userService.findByPhoneNumber(principal.getName()).orElse(null).getId(), bindingResult);
+        var courier = mapper.convertToCourier(courierDTO);
+        int userId = userService.findByPhoneNumber(principal.getName()).orElse(null).getId();
+        courier.setId(courierService.findCourierByUserId(userId));
+        courierValidator.validate(courier, bindingResult);
+        ErrorValidation.message(bindingResult);
+
+        ResponseEntity<?> response = userService.editCourier(courier, userId);
         SecurityContextHolder.clearContext();
 
         return response;

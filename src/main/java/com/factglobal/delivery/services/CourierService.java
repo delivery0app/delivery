@@ -1,7 +1,6 @@
 package com.factglobal.delivery.services;
 
 
-import com.factglobal.delivery.dto.CourierDTO;
 import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.repositories.CourierRepository;
 import com.factglobal.delivery.util.common.Mapper;
@@ -31,16 +30,13 @@ public class CourierService {
                 .getId();
     }
 
-    public List<CourierDTO> findAllCourier() {
-        List<CourierDTO> ordersDTO = courierRepository.findAll()
-                .stream()
-                .map(mapper::convertToCourierDTO)
-                .toList();
+    public List<Courier> findAllCourier() {
+        List<Courier> orders = courierRepository.findAll();
 
-        if (ordersDTO.isEmpty())
+        if (orders.isEmpty())
             throw new NoSuchElementException("No courier has been registered yet");
 
-        return ordersDTO;
+        return orders;
     }
 
     public void saveAndFlush(Courier courier) {
@@ -51,12 +47,6 @@ public class CourierService {
         return courierRepository.findCourierByEmail(email).orElse(null);
     }
 
-    public CourierDTO findCourierDTOByPhoneNumber(String phoneNumber) {
-        Courier courier = courierRepository.findCourierByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new EntityNotFoundException("Courier with id: " + phoneNumber + " was not found"));
-
-        return mapper.convertToCourierDTO(courier);
-    }
 
     public Courier findCourierByPhoneNumber(String phoneNumber) {
         return courierRepository.findCourierByPhoneNumber(phoneNumber)
