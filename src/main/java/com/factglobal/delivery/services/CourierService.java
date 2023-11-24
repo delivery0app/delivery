@@ -3,7 +3,6 @@ package com.factglobal.delivery.services;
 
 import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.repositories.CourierRepository;
-import com.factglobal.delivery.util.common.Mapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,14 +16,13 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class CourierService {
     private final CourierRepository courierRepository;
-    private final Mapper mapper;
 
     public Courier findCourier(int id) {
         return courierRepository.findById(id)
                 .orElseThrow((() -> new EntityNotFoundException("Customer with id: " + id + " was not found")));
     }
 
-    public Integer findCourierByUserId(int userId) {
+    public Integer findCourierIdByUserId(int userId) {
         return courierRepository.findCourierByUserId(userId)
                 .orElseThrow((() -> new EntityNotFoundException("Customer with user_id: " + userId + " was not found")))
                 .getId();
@@ -50,7 +48,7 @@ public class CourierService {
 
     public Courier findCourierByPhoneNumber(String phoneNumber) {
         return courierRepository.findCourierByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new EntityNotFoundException("Courier with id: " + phoneNumber + " was not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Courier with number: " + phoneNumber + " was not found"));
     }
 
     public Courier findCourierByInn(String inn) {

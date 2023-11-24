@@ -41,7 +41,7 @@ public class OrderService {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    public ResponseEntity<?> editOrderByAdmin(Order newOrder, int orderId) {
+    public ResponseEntity<HttpStatus> editOrderByAdmin(Order newOrder, int orderId) {
         Order oldOrder = findOrder(orderId);
         enrichOrderFromEdit(newOrder, oldOrder);
         orderRepository.save(newOrder);

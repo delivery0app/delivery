@@ -19,17 +19,17 @@ public class PasswordsMatching implements Validator {
         if (target instanceof RegistrationCourierDto registrationCourierDto) {
 
             if (!registrationCourierDto.getPassword().equals(registrationCourierDto.getConfirmPassword())) {
-                errors.rejectValue("confirmPassword", "", "Password mismatch");
+                errors.rejectValue("confirmPassword", "", "Entered passwords do not match");
             }
         } else if (target instanceof RegistrationCustomerDto registrationCustomerDto) {
 
             if (!registrationCustomerDto.getPassword().equals(registrationCustomerDto.getConfirmPassword())) {
-                errors.rejectValue("confirmPassword", "", "Password mismatch");
+                errors.rejectValue("confirmPassword", "", "Entered passwords do not match");
             }
         } else if (target instanceof RegistrationAdminDTO registrationAdminDTO) {
 
             if (!registrationAdminDTO.getPassword().equals(registrationAdminDTO.getConfirmPassword())) {
-                errors.rejectValue("confirmPassword", "", "Password mismatch");
+                errors.rejectValue("confirmPassword", "", "Entered passwords do not match");
             }
         }
     }

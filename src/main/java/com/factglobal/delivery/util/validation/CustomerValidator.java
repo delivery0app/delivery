@@ -32,18 +32,18 @@ public class CustomerValidator implements Validator {
         if (customerNew.getId() != 0) {
             Customer customer = customerService.findCustomer(customerNew.getId());
             if (customerService.findCustomerByEmail(email) != null && !(email.equals(customer.getEmail()))) {
-                errors.rejectValue("email", "", "This email: " + email + " is already taken");
+                errors.rejectValue("email", "", "This email: " + email + " is already registered to a user");
             }
             if (userService.findByPhoneNumber(phoneNumber).isPresent() &&
                     !(phoneNumber.equals(customer.getPhoneNumber()))) {
-                errors.rejectValue("phoneNumber", "", "This phone number: " + phoneNumber + " is already taken");
+                errors.rejectValue("phoneNumber", "", "This phone number: " + phoneNumber + " is already registered to a user");
             }
         } else {
             if (customerService.findCustomerByEmail(email) != null) {
                 errors.rejectValue("email", "", "This email: " + email + "is already taken");
             }
             if (userService.findByPhoneNumber(phoneNumber).isPresent()) {
-                errors.rejectValue("phoneNumber", "", "This phone number: " + phoneNumber + " is already taken");
+                errors.rejectValue("phoneNumber", "", "This phone number: " + phoneNumber + " is already registered to a user");
             }
         }
     }

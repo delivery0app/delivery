@@ -37,20 +37,20 @@ public class CourierValidator implements Validator {
             }
             if (userService.findByPhoneNumber(phoneNumber).isPresent() &&
                     !(phoneNumber.equals(courier.getPhoneNumber()))) {
-                errors.rejectValue("phoneNumber", "", "This phone number: " + phoneNumber + " is already taken");
+                errors.rejectValue("phoneNumber", "", "This phone number: " + phoneNumber + " is already registered to a user");
             }
             if (courierService.findCourierByInn(inn) != null && !(inn.equals(courier.getInn()))) {
-                errors.rejectValue("inn", "", "This INN number: " + inn + " is already registered");
+                errors.rejectValue("inn", "", "This INN number: " + inn + " is already registered to a user");
             }
         } else {
             if (courierService.findCourierByEmail(email) != null) {
-                errors.rejectValue("email", "", "This email is already taken");
+                errors.rejectValue("email", "", "This email is already registered to a user");
             }
             if (userService.findByPhoneNumber(phoneNumber).isPresent()) {
-                errors.rejectValue("phoneNumber", "", "This phone number is already taken");
+                errors.rejectValue("phoneNumber", "", "This phone number is already registered to a user");
             }
             if (courierService.findCourierByInn(inn) != null) {
-                errors.rejectValue("inn", "", "This INN number is already registered");
+                errors.rejectValue("inn", "", "This INN number is already registered to a user");
             }
         }
 
