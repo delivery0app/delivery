@@ -53,6 +53,9 @@ public class OrderService {
         Customer customer = customerService.findCustomerByPhoneNumber(principal.getName());
         List<Order> orders = orderRepository.findOrdersByCustomerId(customer.getId());
 
+        if (orders.isEmpty())
+            return new ResponseEntity<>("This customer:" + customer.getName() + " does not have this order", HttpStatus.BAD_REQUEST);
+
         for (Order order : orders) {
             if (order.getId() == orderId) {
 
@@ -62,12 +65,10 @@ public class OrderService {
                 newOrder.setId(orderId);
                 enrichOrderFromEdit(newOrder, oldOrder);
                 orderRepository.save(newOrder);
-
-                return ResponseEntity.ok(HttpStatus.OK);
             }
         }
 
-        return new ResponseEntity<>("This customer:" + customer.getName() + " does not have this order", HttpStatus.BAD_REQUEST);
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
     public ResponseEntity<HttpStatus> cancelOrderByAdmin(int orderId) {
@@ -115,7 +116,6 @@ public class OrderService {
 
         for (Order order : orders) {
             if (order.getId() == orderId) {
-
                 if (order.getOrderStatus() == OrderBPM.State.IN_PROGRESS)
                     order.setOrderStatus(OrderBPM.State.DELIVERED);
                 else

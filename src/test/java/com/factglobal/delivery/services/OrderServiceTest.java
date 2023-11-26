@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -59,8 +60,6 @@ class OrderServiceTest {
                 .thenReturn(order);
         when(orderRepository.findById(order.getId()))
                 .thenReturn(Optional.of(order));
-        when(orderRepository.findOrdersByCustomerId(customer.getId()))
-                .thenReturn(Collections.singletonList(order));
         when(customerService.findCustomerByPhoneNumber(anyString()))
                 .thenReturn(customer);
     }
@@ -74,7 +73,7 @@ class OrderServiceTest {
 
         verify(customerService, times(1)).findCustomer(customer.getId());
         verify(orderRepository, times(1)).save(order);
-        assertEquals(HttpStatus.OK, response);
+        assertThat(response).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -83,7 +82,7 @@ class OrderServiceTest {
 
         verify(orderRepository, times(1)).findById(order.getId());
         verify(orderRepository, times(1)).save(order);
-        assertEquals(HttpStatus.OK, response);
+        assertThat(response).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -93,6 +92,8 @@ class OrderServiceTest {
 
         when(principal.getName())
                 .thenReturn(customer.getPhoneNumber());
+        when(orderRepository.findOrdersByCustomerId(customer.getId()))
+                .thenReturn(Collections.singletonList(order));
 
         HttpStatusCode response = orderService.editOrderByCustomer(order, order.getId(), principal).getStatusCode();
 
@@ -100,17 +101,7 @@ class OrderServiceTest {
         verify(customerService, times(1)).findCustomerByPhoneNumber(customer.getPhoneNumber());
         verify(orderRepository, times(1)).findOrdersByCustomerId(customer.getId());
         verify(orderRepository, times(1)).save(order);
-        assertEquals(HttpStatus.OK, response);
-    }
-
-    @Test
-    void editOrderByCustomer_InvalidInput_ThrowsIllegalStateException() {
-        order.setOrderStatus(OrderBPM.State.IN_PROGRESS);
-
-        when(principal.getName())
-                .thenReturn(customer.getPhoneNumber());
-
-        assertThrows(IllegalStateException.class, () ->orderService.editOrderByCustomer(order, order.getId(), principal));
+        assertThat(response).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -119,8 +110,8 @@ class OrderServiceTest {
 
         verify(orderRepository, times(1)).findById(order.getId());
         verify(orderRepository, times(1)).save(order);
-        assertSame(order.getOrderStatus(), OrderBPM.State.CANCELED);
-        assertEquals(HttpStatus.OK, response);
+        assertThat(order.getOrderStatus()).isEqualTo(OrderBPM.State.CANCELED);
+        assertThat(response).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -130,6 +121,8 @@ class OrderServiceTest {
 
         when(principal.getName())
                 .thenReturn(customer.getPhoneNumber());
+        when(orderRepository.findOrdersByCustomerId(customer.getId()))
+                .thenReturn(Collections.singletonList(order));
 
         HttpStatusCode response = orderService.cancelOrderByCustomer(order.getId(), principal).getStatusCode();
 
@@ -138,17 +131,7 @@ class OrderServiceTest {
         verify(orderRepository, times(1)).findOrdersByCustomerId(customer.getId());
         verify(orderRepository, times(1)).save(order);
         assertSame(order.getOrderStatus(), OrderBPM.State.CANCELED);
-        assertEquals(HttpStatus.OK, response);
-    }
-
-    @Test
-    void cancelOrderByCustomer_InvalidInput_ThrowsIllegalStateException() {
-        order.setOrderStatus(OrderBPM.State.IN_PROGRESS);
-
-        when(principal.getName())
-                .thenReturn(customer.getPhoneNumber());
-
-        assertThrows(IllegalStateException.class, () ->orderService.cancelOrderByCustomer(order.getId(), principal));
+        assertThat(response).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -158,7 +141,7 @@ class OrderServiceTest {
         verify(orderRepository, times(1)).findById(order.getId());
         verify(orderRepository, times(1)).save(order);
         assertSame(order.getOrderStatus(), OrderBPM.State.DELIVERED);
-        assertEquals(HttpStatus.OK, response);
+        assertThat(response).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -176,7 +159,7 @@ class OrderServiceTest {
         verify(orderRepository, times(1)).findOrdersByCourierId(courier.getId());
         verify(orderRepository, times(1)).save(order);
         assertSame(order.getOrderStatus(), OrderBPM.State.DELIVERED);
-        assertEquals(HttpStatus.OK, response);
+        assertThat(response).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -184,12 +167,7 @@ class OrderServiceTest {
         Order responseOrder = orderService.findOrder(order.getId());
 
         verify(orderRepository, times(1)).findById(order.getId());
-        assertEquals(order, responseOrder);
-    }
-
-    @Test
-    void findOrder_InvalidInput_ThrowsEntityNotFoundException() {
-        assertThrows(EntityNotFoundException.class, () -> orderService.findOrder(10));
+        assertThat(order).isEqualTo(responseOrder);
     }
 
     @Test
@@ -200,15 +178,7 @@ class OrderServiceTest {
         List<Order> responseOrders = orderService.findAllOrders();
 
         verify(orderRepository, times(1)).findAll();
-        assertEquals(Collections.singletonList(order), responseOrders);
-    }
-
-    @Test
-    void findOrder_InvalidInput_ThrowsNoSuchElementException() {
-        when(orderRepository.findAll())
-                .thenReturn(Collections.emptyList());
-
-        assertThrows(NoSuchElementException.class, () ->orderService.findAllOrders());
+        assertThat(Collections.singletonList(order)).isEqualTo(responseOrders);
     }
 
     @Test
@@ -221,7 +191,7 @@ class OrderServiceTest {
         HttpStatusCode response = orderService.deleteOrder(order.getId()).getStatusCode();
 
         verify(orderRepository, times(1)).delete(order);
-        assertEquals(HttpStatus.OK, response);
+        assertThat(response).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -243,7 +213,7 @@ class OrderServiceTest {
         verify(courierService, times(1)).saveAndFlush(courier);
         assertSame(order.getOrderStatus(), OrderBPM.State.IN_PROGRESS);
         assertSame(courier.getCourierStatus(), Courier.Status.BUSY);
-        assertEquals(HttpStatus.OK, response);
+        assertThat(response).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -260,7 +230,7 @@ class OrderServiceTest {
         verify(courierService, times(1)).saveAndFlush(courier);
         assertSame(order.getOrderStatus(), OrderBPM.State.NEW);
         assertSame(courier.getCourierStatus(), Courier.Status.FREE);
-        assertEquals(HttpStatus.OK, response);
+        assertThat(response).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -306,6 +276,76 @@ class OrderServiceTest {
     void calculateShippingCost_ValidInput_ReturnsDouble() {
         Double response = orderService.calculateShippingCost(order);
 
-        assertEquals(9.48, response);
+        assertThat(9.48).isEqualTo(response);
+    }
+
+    @Test
+    void ifListIsEmptyThrowsNoSuchElementException() {
+        when(orderRepository.findAll())
+                .thenReturn(Collections.emptyList());
+        when(orderRepository.findOrdersByCourierId(anyInt()))
+                .thenReturn(Collections.emptyList());
+        when(orderRepository.findOrdersByCustomerId(anyInt()))
+                .thenReturn(Collections.emptyList());
+        when(orderRepository.findOrdersByOrderStatus(order.getOrderStatus()))
+                .thenReturn(Collections.emptyList());
+
+        assertThrows(NoSuchElementException.class, () ->orderService.findAllOrders());
+        assertThrows(NoSuchElementException.class, () ->orderService.findOrdersByCourier(courier.getId()));
+        assertThrows(NoSuchElementException.class, () ->orderService.findOrdersByCustomer(customer.getId()));
+        assertThrows(NoSuchElementException.class, () ->orderService.findOrdersByStatus("new"));
+    }
+
+    @Test
+    void ifOrderStatusIsInvalidThrowsIllegalStateException() {
+        when(principal.getName())
+                .thenReturn(customer.getPhoneNumber());
+        when(courierService.findCourierByPhoneNumber(anyString()))
+                .thenReturn(courier);
+        when(courierService.findCourier(courier.getId()))
+                .thenReturn(courier);
+        when(orderRepository.findOrdersByCourierId(courier.getId()))
+                .thenReturn(Collections.singletonList(order));
+        when(orderRepository.findOrdersByCustomerId(customer.getId()))
+                .thenReturn(Collections.singletonList(order));
+
+        assertThrows(IllegalStateException.class, () ->orderService.cancelOrderByCustomer(order.getId(), principal));
+        assertThrows(IllegalStateException.class, () ->orderService.editOrderByCustomer(order, order.getId(), principal));
+        assertThrows(IllegalStateException.class, () ->orderService.cancelOrderByCustomer(order.getId(), principal));
+        assertThrows(IllegalStateException.class, () ->orderService.deleteOrder(order.getId()));
+        assertThrows(IllegalStateException.class, () ->orderService.assignCourierToOrder(order.getId(), courier.getId()));
+
+        order.setOrderStatus(OrderBPM.State.NEW);
+        courier.setCourierStatus(Courier.Status.FREE);
+
+        assertThrows(IllegalStateException.class, () ->orderService.deliveredOrder(order.getId(), principal));
+        assertThrows(IllegalStateException.class, () ->orderService.releaseCourierFromOrder(order.getId(), courier.getId()));
+    }
+
+    @Test
+    void ifNoOrderByUserReturnsEntityBadRequest() {
+        order.setOrderStatus(OrderBPM.State.NEW);
+
+        when(orderRepository.findOrdersByCustomerId(10))
+                .thenReturn(Collections.emptyList());
+        when(principal.getName())
+                .thenReturn(customer.getPhoneNumber());
+        when(courierService.findCourierByPhoneNumber(anyString()))
+                .thenReturn(courier);
+        when(orderRepository.findOrdersByCourierId(courier.getId()))
+                .thenReturn(Collections.emptyList());
+
+        HttpStatusCode responseEdit = orderService.editOrderByCustomer(order, order.getId(), principal).getStatusCode();
+        HttpStatusCode responseCancel = orderService.cancelOrderByCustomer(order.getId(), principal).getStatusCode();
+        HttpStatusCode responseDelivered = orderService.deliveredOrder(order.getId(), principal).getStatusCode();
+
+        assertThat(responseEdit).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(responseCancel).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(responseDelivered).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void findOrder_InvalidInput_ThrowsEntityNotFoundException() {
+        assertThrows(EntityNotFoundException.class, () -> orderService.findOrder(10));
     }
 }
