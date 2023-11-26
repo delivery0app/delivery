@@ -16,8 +16,6 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class CustomerService {
     private final CustomerRepository customerRepository;
-    private final Mapper mapper;
-
     public Integer findCustomerByUserId(int userId) {
         return customerRepository.findCustomerByUserId(userId)
                 .orElseThrow((() -> new EntityNotFoundException("User with id: " + userId + " was not found")))
@@ -45,7 +43,7 @@ public class CustomerService {
 
     public Customer findCustomerByPhoneNumber(String phoneNumber) {
         return customerRepository.findCustomerByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new EntityNotFoundException("Customer with id: " + phoneNumber + " was not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Customer with number: " + phoneNumber + " was not found"));
     }
 
     public Customer findCustomerByEmail(String email) {

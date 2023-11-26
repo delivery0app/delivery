@@ -44,7 +44,7 @@ public class OrderController {
 
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping
-    public ResponseEntity<HttpStatus> createOrder(@RequestBody @Valid OrderDTO orderDTO,
+    public ResponseEntity<?> createOrder(@RequestBody @Valid OrderDTO orderDTO,
                                                   BindingResult bindingResult,
                                                   Principal principal) {
         ErrorValidation.message(bindingResult);
@@ -95,7 +95,7 @@ public class OrderController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/customers/{customer_id}")
-    public List<OrderDTO> getOrdersByCustomerByAdmin(@PathVariable("customer_id") int customerId) {
+    public List<OrderDTO> getOrdersByCustomerForAdmin(@PathVariable("customer_id") int customerId) {
         return orderService.findOrdersByCustomer(customerId).stream()
                 .map(mapper::convertToOrderDTO)
                 .toList();
@@ -103,7 +103,7 @@ public class OrderController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/couriers/{courier_id}")
-    public List<OrderDTO> getOrdersByCourierByAdmin(@PathVariable("courier_id") int courierId) {
+    public List<OrderDTO> getOrdersByCourierForAdmin(@PathVariable("courier_id") int courierId) {
         return orderService.findOrdersByCourier(courierId).stream()
                 .map(mapper::convertToOrderDTO)
                 .toList();

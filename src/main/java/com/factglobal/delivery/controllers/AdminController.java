@@ -2,21 +2,17 @@ package com.factglobal.delivery.controllers;
 
 import com.factglobal.delivery.dto.CourierDTO;
 import com.factglobal.delivery.dto.CustomerDTO;
-import com.factglobal.delivery.dto.OrderDTO;
 import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.services.CourierService;
 import com.factglobal.delivery.services.CustomerService;
-import com.factglobal.delivery.services.OrderService;
 import com.factglobal.delivery.services.UserService;
 import com.factglobal.delivery.util.common.Mapper;
-import com.factglobal.delivery.util.common.OrderBPM;
 import com.factglobal.delivery.util.exception_handling.ErrorValidation;
 import com.factglobal.delivery.util.validation.CourierValidator;
 import com.factglobal.delivery.util.validation.CustomerValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +50,7 @@ public class AdminController {
                                          BindingResult bindingResult,
                                          @PathVariable("user_id") int userId) {
         Courier courier = mapper.convertToCourier(courierDTO);
-        courier.setId(courierService.findCourierByUserId(userId));
+        courier.setId(courierService.findCourierIdByUserId(userId));
         courierValidator.validate(courier, bindingResult);
         ErrorValidation.message(bindingResult);
 
