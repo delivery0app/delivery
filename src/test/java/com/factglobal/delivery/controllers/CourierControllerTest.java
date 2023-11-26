@@ -98,7 +98,7 @@ class CourierControllerTest {
             when(mapper.convertToCourier(courierDTO)).thenReturn(courier);
             when(userService.findByPhoneNumber(user.getPhoneNumber()))
                     .thenReturn(Optional.of(user));
-            when(courierService.findCourierByUserId(user.getId()))
+            when(courierService.findCourierUserId(user.getId()))
                     .thenReturn(courier.getId());
             when(userService.editCourier(courier, user.getId()))
                     .thenReturn(ResponseEntity.ok(courier));
@@ -114,7 +114,7 @@ class CourierControllerTest {
 
             verify(mapper, times(1)).convertToCourier(courierDTO);
             verify(userService, times(1)).findByPhoneNumber(user.getPhoneNumber());
-            verify(courierService, times(1)).findCourierByUserId(user.getId());
+            verify(courierService, times(1)).findCourierUserId(user.getId());
             verify(courierValidator, times(1)).validate(eq(courier), any(BindingResult.class));
             verify(userService, times(1)).editCourier(courier, user.getId());
         }

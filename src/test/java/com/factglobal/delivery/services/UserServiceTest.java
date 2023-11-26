@@ -112,9 +112,7 @@ class UserServiceTest {
         when(userRepository.saveAndFlush(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
         when(roleService.getUserRole(anyString())).thenReturn(role);
 
-
         User result = userService.createAndSaveUser("+79999999999", "SecureP@ss2", role.getName());
-
 
         assertThat(result.getPhoneNumber()).isEqualTo("+79999999999");
         assertThat(result.getPassword()).isEqualTo("encodedPassword");
@@ -143,9 +141,7 @@ class UserServiceTest {
         doNothing().when(courierService).saveAndFlush(any(Courier.class));
         doNothing().when(courierService).enrichCourier(any(Courier.class));
 
-
         User result = userService.createNewCourier(registrationCourierDto);
-
 
         assertThat(result.getPhoneNumber()).isEqualTo(registrationCourierDto.getPhoneNumber());
         assertThat(result.getCourier().getEmail()).isEqualTo(registrationCourierDto.getEmail());
@@ -172,9 +168,7 @@ class UserServiceTest {
         when(userRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
         doNothing().when(customerService).saveAndFlush(any(Customer.class));
 
-
         User result = userService.createNewCustomer(registrationCustomerDto);
-
 
         assertThat(result.getPhoneNumber()).isEqualTo(registrationCustomerDto.getPhoneNumber());
         assertThat(result.getCustomer().getEmail()).isEqualTo(registrationCustomerDto.getEmail());
@@ -197,9 +191,7 @@ class UserServiceTest {
         when(userService.createAndSaveUser(registrationAdminDTO.getPhoneNumber(), registrationAdminDTO.getPassword(), "ROLE_ADMIN")).thenReturn(user);
         when(userRepository.saveAndFlush(any(User.class))).thenReturn(user);
 
-
         User result = userService.createNewAdmin(registrationAdminDTO);
-
 
         assertThat(result.getPhoneNumber()).isEqualTo(registrationAdminDTO.getPhoneNumber());
         verify(userRepository, times(1)).saveAndFlush(any(User.class));
@@ -214,9 +206,7 @@ class UserServiceTest {
         doNothing().when(courierService).saveAndFlush(any(Courier.class));
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-
         ResponseEntity<?> result = userService.editCourier(courier, 1);
-
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(user.getPhoneNumber()).isEqualTo(courier.getPhoneNumber());
@@ -234,9 +224,7 @@ class UserServiceTest {
         doNothing().when(customerService).saveAndFlush(any(Customer.class));
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-
         ResponseEntity<?> result = userService.editCustomer(customer, 1);
-
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(user.getPhoneNumber()).isEqualTo(customer.getPhoneNumber());
@@ -252,9 +240,7 @@ class UserServiceTest {
         when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
         when(userRepository.saveAndFlush(any(User.class))).thenReturn(user);
 
-
         ResponseEntity<?> result = userService.blockUser(user.getId());
-
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertFalse(user.getBlock());
@@ -268,9 +254,7 @@ class UserServiceTest {
         when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
         when(userRepository.saveAndFlush(any(User.class))).thenReturn(user);
 
-
         ResponseEntity<?> result = userService.unblockUser(user.getId());
-
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertTrue(user.getBlock());

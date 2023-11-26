@@ -100,9 +100,7 @@ class OrderControllerTest {
         when(orderService.findAllOrders()).thenReturn(orderList);
         when(mapper.convertToOrderDTO(any(Order.class))).thenReturn(orderDTO);
 
-
         var result = mockMvc.perform(get("/orders"));
-
 
         result.andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(orderDtoList)));
@@ -115,10 +113,8 @@ class OrderControllerTest {
         when(orderService.findOrder(1)).thenReturn(order);
         when(mapper.convertToOrderDTO(any(Order.class))).thenReturn(orderDTO);
 
-
         var result = mockMvc.perform(get("/orders/{order_id}", 1)
                 .contentType(MediaType.APPLICATION_JSON));
-
 
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.senderAddress").value(orderDTO.getSenderAddress()))
@@ -141,12 +137,10 @@ class OrderControllerTest {
         when(orderService.saveOrder(any(Order.class), eq(customer.getId()))).thenReturn(ResponseEntity.ok(HttpStatus.OK));
         when(mapper.convertToOrder(any(OrderDTO.class))).thenReturn(order);
 
-
         var result = mockMvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(orderDTO))
                 .principal(principal));
-
 
         result.andExpect(status().isOk());
         verify(customerService, times(1)).findCustomerByPhoneNumber(anyString());
@@ -158,9 +152,7 @@ class OrderControllerTest {
     void deleteOrder_AdminRole_ValidInput_ReturnsOkResponse() throws Exception {
         when(orderService.deleteOrder(1)).thenReturn(ResponseEntity.ok(any()));
 
-
         var result = mockMvc.perform(delete("/orders/{order_id}", 1));
-
 
         result.andExpect(status().isOk());
         verify(orderService, times(1)).deleteOrder(1);
@@ -172,12 +164,10 @@ class OrderControllerTest {
         when(mapper.convertToOrder(any(OrderDTO.class))).thenReturn(order);
         when(orderService.editOrderByAdmin(any(Order.class), anyInt())).thenReturn(ResponseEntity.ok(HttpStatus.OK));
 
-
         var result = mockMvc.perform(put("/orders/{order_id}/admin", 1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(orderDTO))
                 .principal(principal));
-
 
         result.andExpect(status().isOk());
         verify(mapper, times(1)).convertToOrder(any(OrderDTO.class));
@@ -190,12 +180,10 @@ class OrderControllerTest {
         when(mapper.convertToOrder(any(OrderDTO.class))).thenReturn(order);
         when(orderService.editOrderByCustomer(any(Order.class), eq(1), any(Principal.class))).thenReturn(ResponseEntity.ok().build());
 
-
         var result = mockMvc.perform(put("/orders/{order_id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(orderDTO))
                 .principal(principal));
-
 
         result.andExpect(status().isOk());
         verify(mapper, times(1)).convertToOrder(any(OrderDTO.class));
@@ -218,10 +206,8 @@ class OrderControllerTest {
         when(orderService.findOrdersByCustomer(customer.getId())).thenReturn(orderList);
         when(mapper.convertToOrderDTO(any(Order.class))).thenReturn(orderDTO);
 
-
         var result = mockMvc.perform(get("/orders/customers")
                 .principal(principal));
-
 
         result.andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(orderDtoList)));
@@ -238,9 +224,7 @@ class OrderControllerTest {
         when(orderService.findOrdersByCustomer(1)).thenReturn(orderList);
         when(mapper.convertToOrderDTO(any(Order.class))).thenReturn(orderDTO);
 
-
         var result = mockMvc.perform(get("/orders/customers/{customer_id}", 1));
-
 
         result.andExpect(status().isOk())
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(orderDtoList)));
@@ -258,9 +242,7 @@ class OrderControllerTest {
         when(orderService.findOrdersByCourier(1)).thenReturn(orderList);
         when(mapper.convertToOrderDTO(any(Order.class))).thenReturn(orderDTO);
 
-
         var result = mockMvc.perform(get("/orders/couriers/{courier_id}", 1));
-
 
         result.andExpect(status().isOk())
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(orderDtoList)));
@@ -284,10 +266,8 @@ class OrderControllerTest {
         when(orderService.findOrdersByCourier(anyInt())).thenReturn(orderList);
         when(mapper.convertToOrderDTO(any(Order.class))).thenReturn(orderDTO);
 
-
         var result = mockMvc.perform(get("/orders/couriers")
                 .principal(principal));
-
 
         result.andExpect(status().isOk())
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(orderDtoList)));
@@ -300,9 +280,7 @@ class OrderControllerTest {
     void cancelOrderByAdmin_AdminRole_ValidInput_ReturnsOkResponse() throws Exception {
         when(orderService.cancelOrderByAdmin(anyInt())).thenReturn(ResponseEntity.ok().build());
 
-
         var result = mockMvc.perform(put("/orders/{order_id}/cancel/admin", 1));
-
 
         result.andExpect(status().isOk());
         verify(orderService, times(1)).cancelOrderByAdmin(anyInt());
@@ -313,10 +291,8 @@ class OrderControllerTest {
     void cancelOrderByCustomer_CustomerRole_ValidInput_ReturnsOkResponse() throws Exception {
         when(orderService.cancelOrderByCustomer(anyInt(), any(Principal.class))).thenReturn(ResponseEntity.ok().build());
 
-
         var result = mockMvc.perform(put("/orders/{order_id}/cancel", 1)
                 .principal(principal));
-
 
         result.andExpect(status().isOk());
         verify(orderService, times(1)).cancelOrderByCustomer(anyInt(), any(Principal.class));
@@ -327,9 +303,7 @@ class OrderControllerTest {
     void deliveredOrderByAdmin_AdminRole_ValidInput_ReturnsOkResponse() throws Exception {
         when(orderService.deliveredOrder(anyInt())).thenReturn(ResponseEntity.ok().build());
 
-
         var result = mockMvc.perform(put("/orders/{order_id}/delivered/admin", 1));
-
 
         result.andExpect(status().isOk());
         verify(orderService, times(1)).deliveredOrder(1);
@@ -340,10 +314,8 @@ class OrderControllerTest {
     void deliveredOrderByCourier_CourierRole_ValidInput_ReturnsOkResponse() throws Exception {
         when(orderService.deliveredOrder(eq(1), any(Principal.class))).thenReturn(ResponseEntity.ok().build());
 
-
         var result = mockMvc.perform(put("/orders/{order_id}/delivered", 1)
                 .principal(principal));
-
 
         result.andExpect(status().isOk());
         verify(orderService, times(1)).deliveredOrder(eq(1), any(Principal.class));
@@ -354,9 +326,7 @@ class OrderControllerTest {
     void assignCourierForOrderByAdmin_AdminRole_ValidInput_ReturnsOkResponse() throws Exception {
         when(orderService.assignCourierToOrder(anyInt(), anyInt())).thenReturn(ResponseEntity.ok().build());
 
-
         var result = mockMvc.perform(put("/orders/{order_id}/couriers/{courier_id}/assign", 1, 1));
-
 
         result.andExpect(status().isOk());
         verify(orderService, times(1)).assignCourierToOrder(1, 1);
@@ -372,10 +342,8 @@ class OrderControllerTest {
         when(courierService.findCourierByPhoneNumber(anyString())).thenReturn(courier);
         when(orderService.assignCourierToOrder(anyInt(), anyInt())).thenReturn(ResponseEntity.ok().build());
 
-
         var result = mockMvc.perform(put("/orders/{order_id}/couriers/assign", 1)
                 .principal(principal));
-
 
         result.andExpect(status().isOk());
         verify(orderService, times(1)).assignCourierToOrder(1, courier.getId());
@@ -387,9 +355,7 @@ class OrderControllerTest {
     void releaseCourierFromOrder_AdminRole_ValidInput_ReturnsOkResponse() throws Exception {
         when(orderService.releaseCourierFromOrder(anyInt(), anyInt())).thenReturn(ResponseEntity.ok().build());
 
-
         var result = mockMvc.perform(put("/orders/{order_id}/couriers/{courier_id}/release", 1, 1));
-
 
         result.andExpect(status().isOk());
         verify(orderService, times(1)).releaseCourierFromOrder(1, 1);
@@ -404,10 +370,8 @@ class OrderControllerTest {
         when(orderService.findOrdersByStatus(anyString())).thenReturn(orderList);
         when(mapper.convertToOrderDTO(any(Order.class))).thenReturn(any(OrderDTO.class));
 
-
         var result = mockMvc.perform(get("/orders/status")
                 .param("status", String.valueOf(OrderBPM.State.NEW)));
-
 
         result.andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(orderDtoList)));

@@ -22,7 +22,7 @@ public class CourierService {
                 .orElseThrow((() -> new EntityNotFoundException("Customer with id: " + id + " was not found")));
     }
 
-    public Integer findCourierIdByUserId(int userId) {
+    public Integer findCourierUserId(int userId) {
         return courierRepository.findCourierByUserId(userId)
                 .orElseThrow((() -> new EntityNotFoundException("Customer with user_id: " + userId + " was not found")))
                 .getId();

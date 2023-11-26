@@ -160,7 +160,7 @@ class AdminControllerTest {
         @Test
         void editCourier_AdminRole_ValidInput_ReturnsResponseEntityOkAndCourier() throws Exception{
             when(mapper.convertToCourier(courierDTO)).thenReturn(courier);
-            when(courierService.findCourierByUserId(user.getId()))
+            when(courierService.findCourierUserId(user.getId()))
                     .thenReturn(courier.getId());
             doNothing().when(courierValidator).validate(eq(courier), any(BindingResult.class));
             when(userService.editCourier(courier, user.getId()))
@@ -175,7 +175,7 @@ class AdminControllerTest {
                     .andExpect(content().json(objectMapper.writeValueAsString(courier)));
 
             verify(mapper, times(1)).convertToCourier(courierDTO);
-            verify(courierService, times(1)).findCourierByUserId(user.getId());
+            verify(courierService, times(1)).findCourierUserId(user.getId());
             verify(courierValidator, times(1)).validate(eq(courier), any(BindingResult.class));
             verify(userService, times(1)).editCourier(courier, user.getId());
         }

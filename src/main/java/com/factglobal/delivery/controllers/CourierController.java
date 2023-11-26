@@ -40,7 +40,7 @@ public class CourierController {
                                          Principal principal) {
         var courier = mapper.convertToCourier(courierDTO);
         int userId = userService.findByPhoneNumber(principal.getName()).orElse(null).getId();
-        courier.setId(courierService.findCourierIdByUserId(userId));
+        courier.setId(courierService.findCourierUserId(userId));
         courierValidator.validate(courier, bindingResult);
         ErrorValidation.message(bindingResult);
 

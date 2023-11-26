@@ -50,7 +50,7 @@ public class AdminController {
                                          BindingResult bindingResult,
                                          @PathVariable("user_id") int userId) {
         Courier courier = mapper.convertToCourier(courierDTO);
-        courier.setId(courierService.findCourierIdByUserId(userId));
+        courier.setId(courierService.findCourierUserId(userId));
         courierValidator.validate(courier, bindingResult);
         ErrorValidation.message(bindingResult);
 

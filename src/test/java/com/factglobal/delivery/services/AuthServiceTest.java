@@ -50,10 +50,8 @@ class AuthServiceTest {
         when(userService.loadUserByUsername(authRequest.getPhoneNumber())).thenReturn(userDetails);
         when(jwtTokenUtils.generateToken(userDetails)).thenReturn("generatedToken");
 
-
         ResponseEntity<?> result = authService.createAuthToken(authRequest);
         JwtResponse jwtResponse = (JwtResponse) result.getBody();
-
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(jwtResponse).isInstanceOf(JwtResponse.class);
@@ -88,15 +86,12 @@ class AuthServiceTest {
         registrationCourierDto.setPhoneNumber("+79999999999");
         registrationCourierDto.setPassword("SecureP@ss2");
         registrationCourierDto.setConfirmPassword("SecureP@ss2");
-
         User user = new User();
         user.setPhoneNumber(registrationCourierDto.getPhoneNumber());
 
         when(userService.createNewCourier(registrationCourierDto)).thenReturn(user);
 
-
         ResponseEntity<UserDto> result = authService.createNewCourier(registrationCourierDto);
-
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertNotNull(result.getBody());
@@ -112,15 +107,12 @@ class AuthServiceTest {
         registrationCustomerDto.setPhoneNumber("+79999999999");
         registrationCustomerDto.setPassword("SecureP@ss2");
         registrationCustomerDto.setConfirmPassword("SecureP@ss2");
-
         User user = new User();
         user.setPhoneNumber(registrationCustomerDto.getPhoneNumber());
 
         when(userService.createNewCustomer(registrationCustomerDto)).thenReturn(user);
 
-
         ResponseEntity<UserDto> result = authService.createNewCustomer(registrationCustomerDto);
-
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertNotNull(result.getBody());
@@ -134,15 +126,12 @@ class AuthServiceTest {
         registrationAdminDTO.setPhoneNumber("+79999999999");
         registrationAdminDTO.setPassword("SecureP@ss2");
         registrationAdminDTO.setConfirmPassword("SecureP@ss2");
-
         User user = new User();
         user.setPhoneNumber(registrationAdminDTO.getPhoneNumber());
 
         when(userService.createNewAdmin(registrationAdminDTO)).thenReturn(user);
 
-
         ResponseEntity<UserDto> result = authService.createNewAdmin(registrationAdminDTO);
-
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertNotNull(result.getBody());

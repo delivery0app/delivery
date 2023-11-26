@@ -51,8 +51,8 @@ class CourierServiceTest {
     void shouldThrowExceptionIfCourierNotFound() {
         assertAll(
                 () -> assertThrows(EntityNotFoundException.class, () -> courierService.findCourier(0)),
-                () -> assertThrows(EntityNotFoundException.class, () -> courierService.findCourierIdByUserId(0)),
-                () -> assertThrows(NoSuchElementException.class, () -> courierService.findAllCourier()),
+                () -> assertThrows(EntityNotFoundException.class, () -> courierService.findCourierUserId(0)),
+                () -> assertThrows(NoSuchElementException.class, () -> courierService.findAllCouriers()),
                 () -> assertThrows(EntityNotFoundException.class, () -> courierService.findCourierByPhoneNumber("dummy"))
         );
     }
@@ -71,7 +71,7 @@ class CourierServiceTest {
     void findCourierIdByUserId_ValidUserId_ReturnsCourierId() {
         when(courierRepository.findCourierByUserId(1)).thenReturn(Optional.of(courier));
 
-        Integer result = courierService.findCourierIdByUserId(1);
+        Integer result = courierService.findCourierUserId(1);
 
         assertThat(result).isEqualTo(courier.getId());
         verify(courierRepository, times(1)).findCourierByUserId(1);
@@ -81,7 +81,7 @@ class CourierServiceTest {
     void findAllCourier_ReturnsListOfCouriers() {
         when(courierRepository.findAll()).thenReturn(List.of(courier));
 
-        List<Courier> result = courierService.findAllCourier();
+        List<Courier> result = courierService.findAllCouriers();
 
         assertThat(result.get(0).getEmail()).isEqualTo(courier.getEmail());
         verify(courierRepository, times(1)).findAll();

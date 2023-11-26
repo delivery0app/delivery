@@ -33,7 +33,7 @@ public class CourierValidator implements Validator {
         if (courierNew.getId() != 0) {
             Courier courier = courierService.findCourier(courierNew.getId());
             if (courierService.findCourierByEmail(email) != null && !(email.equals(courier.getEmail()))) {
-                errors.rejectValue("email", "", "This email: " + email + " is already taken");
+                errors.rejectValue("email", "", "This email: " + email + " is already registered to a user");
             }
             if (userService.findByPhoneNumber(phoneNumber).isPresent() &&
                     !(phoneNumber.equals(courier.getPhoneNumber()))) {

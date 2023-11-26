@@ -40,7 +40,7 @@ public class CustomerValidator implements Validator {
             }
         } else {
             if (customerService.findCustomerByEmail(email) != null) {
-                errors.rejectValue("email", "", "This email: " + email + "is already taken");
+                errors.rejectValue("email", "", "This email: " + email + "is already registered to a user");
             }
             if (userService.findByPhoneNumber(phoneNumber).isPresent()) {
                 errors.rejectValue("phoneNumber", "", "This phone number: " + phoneNumber + " is already registered to a user");
