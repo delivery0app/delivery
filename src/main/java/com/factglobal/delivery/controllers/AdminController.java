@@ -70,14 +70,14 @@ public class AdminController {
     }
 
     @GetMapping("/couriers")
-    public List<CourierDTO> getAllCourier() {
-        return courierService.findAllCourier().stream()
+    public List<CourierDTO> getAllCouriers() {
+        return courierService.findAllCouriers().stream()
                 .map(mapper::convertToCourierDTO)
                 .toList();
     }
 
     @GetMapping("/customers")
-    public List<CustomerDTO> getAllCustomer() {
+    public List<CustomerDTO> getAllCustomers() {
         return customerService.findAllCustomers().stream()
                 .map(mapper::convertToCustomerDTO)
                 .toList();

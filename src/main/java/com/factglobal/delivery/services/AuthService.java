@@ -23,7 +23,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
 
-    public ResponseEntity<?> createAuthToken(JwtRequest authRequest) {
+    public ResponseEntity<?> createAuthToken(JwtRequest authRequest){
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getPhoneNumber(), authRequest.getPassword()));
         } catch (BadCredentialsException e) {

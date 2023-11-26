@@ -1,10 +1,12 @@
 package com.factglobal.delivery.dto.security;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class RegistrationAdminDTO {
     @NotBlank(message = "Phone number should not be empty")
     @Pattern(regexp = "^\\+7\\d{3}\\d{7}$"

@@ -2,7 +2,6 @@ package com.factglobal.delivery.services;
 
 import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.repositories.CustomerRepository;
-import com.factglobal.delivery.util.common.Mapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +15,7 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class CustomerService {
     private final CustomerRepository customerRepository;
+
     public Integer findCustomerByUserId(int userId) {
         return customerRepository.findCustomerByUserId(userId)
                 .orElseThrow((() -> new EntityNotFoundException("User with id: " + userId + " was not found")))

@@ -5,7 +5,6 @@ import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.models.Order;
 import com.factglobal.delivery.repositories.OrderRepository;
 import com.factglobal.delivery.util.common.DistanceCalculator;
-import com.factglobal.delivery.util.common.Mapper;
 import com.factglobal.delivery.util.common.OrderBPM;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -30,7 +29,6 @@ public class OrderService {
     private final CourierService courierService;
     private final CustomerService customerService;
     private final DistanceCalculator distanceCalculator;
-    private final Mapper mapper;
 
     public ResponseEntity<HttpStatus> saveOrder(Order order, int customerId) {
 
@@ -55,6 +53,9 @@ public class OrderService {
         Customer customer = customerService.findCustomerByPhoneNumber(principal.getName());
         List<Order> orders = orderRepository.findOrdersByCustomerId(customer.getId());
 
+        if (orders.isEmpty())
+            return new ResponseEntity<>("This customer:" + customer.getName() + " does not have this order", HttpStatus.BAD_REQUEST);
+
         for (Order order : orders) {
             if (order.getId() == orderId) {
 
@@ -64,12 +65,10 @@ public class OrderService {
                 newOrder.setId(orderId);
                 enrichOrderFromEdit(newOrder, oldOrder);
                 orderRepository.save(newOrder);
-
-                return ResponseEntity.ok(HttpStatus.OK);
             }
         }
 
-        return new ResponseEntity<>("This customer:" + customer.getName() + " does not have this order", HttpStatus.BAD_REQUEST);
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
     public ResponseEntity<HttpStatus> cancelOrderByAdmin(int orderId) {
@@ -112,12 +111,11 @@ public class OrderService {
     }
 
     public ResponseEntity<?> deliveredOrder(int orderId, Principal principal) {
-        Courier courier = courierService.findCourierByEmail(principal.getName());
+        Courier courier = courierService.findCourierByPhoneNumber(principal.getName());
         List<Order> orders = orderRepository.findOrdersByCourierId(courier.getId());
 
         for (Order order : orders) {
             if (order.getId() == orderId) {
-
                 if (order.getOrderStatus() == OrderBPM.State.IN_PROGRESS)
                     order.setOrderStatus(OrderBPM.State.DELIVERED);
                 else

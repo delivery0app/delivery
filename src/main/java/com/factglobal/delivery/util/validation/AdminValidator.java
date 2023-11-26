@@ -1,6 +1,7 @@
 package com.factglobal.delivery.util.validation;
 
 import com.factglobal.delivery.dto.security.RegistrationAdminDTO;
+import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

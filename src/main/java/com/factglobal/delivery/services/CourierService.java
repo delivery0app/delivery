@@ -28,7 +28,7 @@ public class CourierService {
                 .getId();
     }
 
-    public List<Courier> findAllCourier() {
+    public List<Courier> findAllCouriers() {
         List<Courier> orders = courierRepository.findAll();
 
         if (orders.isEmpty())
