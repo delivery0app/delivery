@@ -67,16 +67,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({Exception.class})
-    public ResponseEntity<Map<String, Object>> unknownException(Exception ex, HttpServletRequest request) {
-        final Map<String, Object> body = new TreeMap<>();
-
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR);
-        body.put("error", "UnknownException");
-        body.put("message", ex.getMessage());
-        body.put("details", "Error");
-        body.put("path", request.getServletPath());
-
-        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+//    @ExceptionHandler({Exception.class})
+//    public ResponseEntity<Map<String, Object>> unknownException(Exception ex, HttpServletRequest request) {
+//        final Map<String, Object> body = new TreeMap<>();
+//
+//        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR);
+//        body.put("error", "UnknownException");
+//        body.put("message", ex.getMessage());
+//        body.put("details", "Error");
+//        body.put("path", request.getServletPath());
+//
+//        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 }

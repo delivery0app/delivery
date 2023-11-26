@@ -19,16 +19,16 @@ public class AdminValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return Customer.class.equals(clazz);
+        return RegistrationAdminDTO.class.equals(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-        RegistrationAdminDTO adminNew = (RegistrationAdminDTO) target;
-        String phoneNumber = adminNew.getPhoneNumber();
+        RegistrationAdminDTO user = (RegistrationAdminDTO) target;
+        String phoneNumber = user.getPhoneNumber();
 
-        if (userService.findByPhoneNumber(phoneNumber).isPresent())
-                errors.rejectValue("phoneNumber", "", "This phone number: " + phoneNumber + " is already taken");
+        if (userService.findByPhoneNumber(phoneNumber).isPresent()) {
+            errors.rejectValue("phoneNumber", "", "Administrator with phone number: " + phoneNumber + " is already registered to a user");
+        }
     }
 }
-

@@ -7,10 +7,9 @@ import com.factglobal.delivery.services.UserService;
 import com.factglobal.delivery.util.common.Mapper;
 import com.factglobal.delivery.util.exception_handling.ErrorValidation;
 import com.factglobal.delivery.util.validation.CourierValidator;
-import com.factglobal.delivery.util.validation.CustomerValidator;
+import com.factglobal.delivery.util.validation.PasswordsMatching;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
@@ -41,7 +40,7 @@ public class CourierController {
                                          Principal principal) {
         var courier = mapper.convertToCourier(courierDTO);
         int userId = userService.findByPhoneNumber(principal.getName()).orElse(null).getId();
-        courier.setId(courierService.findCourierByUserId(userId));
+        courier.setId(courierService.findCourierIdByUserId(userId));
         courierValidator.validate(courier, bindingResult);
         ErrorValidation.message(bindingResult);
 

@@ -43,7 +43,7 @@ public class CustomerService {
 
     public Customer findCustomerByPhoneNumber(String phoneNumber) {
         return customerRepository.findCustomerByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new EntityNotFoundException("Customer with id: " + phoneNumber + " was not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Customer with number: " + phoneNumber + " was not found"));
     }
 
     public Customer findCustomerByEmail(String email) {

@@ -19,7 +19,7 @@ public class CourierDTO {
 
     @NotBlank(message = "Phone number should not be empty")
     @Pattern(regexp = "^\\+7\\d{3}\\d{7}$"
-            , message = "Phone number must consist of 14 digits and match the format +7XXXХХХХХХХ")
+            , message = "Phone number should consist of 14 digits and match the format +7XXXХХХХХХХ")
     private String phoneNumber;
 
     @Email(message = "Email should be valid")

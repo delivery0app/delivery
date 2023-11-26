@@ -63,7 +63,7 @@ public class UserService implements UserDetailsService {
         );
     }
 
-    private User createAndSaveUser(String phoneNumber, String password, String role) {
+    public User createAndSaveUser(String phoneNumber, String password, String role) {
         User user = new User();
         user.setPhoneNumber(phoneNumber);
         user.setPassword(passwordEncoder.encode(password));
@@ -117,6 +117,7 @@ public class UserService implements UserDetailsService {
 
     public ResponseEntity<Customer> editCustomer(Customer customer, int userId) {
         User user = findById(userId);
+
         customer.setUser(user);
         customerService.saveAndFlush(customer);
 
@@ -153,4 +154,6 @@ public class UserService implements UserDetailsService {
 
         return ResponseEntity.ok().body("User with phone number:" + phoneNumber + " is delete");
     }
+
+
 }
