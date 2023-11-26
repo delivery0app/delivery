@@ -102,7 +102,7 @@ public class UserService implements UserDetailsService {
         return createAndSaveUser(registrationAdminDTO.getPhoneNumber(), registrationAdminDTO.getPassword(), "ROLE_ADMIN");
     }
 
-    public ResponseEntity<?> editCourier(Courier courier, int userId) {
+    public ResponseEntity<Courier> editCourier(Courier courier, int userId) {
         User user = findById(userId);
 
         courier.setUser(user);
@@ -115,7 +115,7 @@ public class UserService implements UserDetailsService {
         return ResponseEntity.ok(courier);
     }
 
-    public ResponseEntity<?> editCustomer(Customer customer, int userId) {
+    public ResponseEntity<Customer> editCustomer(Customer customer, int userId) {
         User user = findById(userId);
         customer.setUser(user);
         customerService.saveAndFlush(customer);
@@ -147,7 +147,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findByPhoneNumber(phoneNumber);
     }
 
-    public ResponseEntity<?> deleteUser(int id) {
+    public ResponseEntity<String> deleteUser(int id) {
         String phoneNumber = findById(id).getPhoneNumber();
         userRepository.deleteById(id);
 

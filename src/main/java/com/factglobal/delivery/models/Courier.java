@@ -9,8 +9,7 @@ import org.hibernate.validator.constraints.Length;
 
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity

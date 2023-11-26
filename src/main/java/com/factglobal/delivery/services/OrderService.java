@@ -5,7 +5,6 @@ import com.factglobal.delivery.models.Customer;
 import com.factglobal.delivery.models.Order;
 import com.factglobal.delivery.repositories.OrderRepository;
 import com.factglobal.delivery.util.common.DistanceCalculator;
-import com.factglobal.delivery.util.common.Mapper;
 import com.factglobal.delivery.util.common.OrderBPM;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -30,7 +29,6 @@ public class OrderService {
     private final CourierService courierService;
     private final CustomerService customerService;
     private final DistanceCalculator distanceCalculator;
-    private final Mapper mapper;
 
     public ResponseEntity<HttpStatus> saveOrder(Order order, int customerId) {
 
@@ -112,7 +110,7 @@ public class OrderService {
     }
 
     public ResponseEntity<?> deliveredOrder(int orderId, Principal principal) {
-        Courier courier = courierService.findCourierByEmail(principal.getName());
+        Courier courier = courierService.findCourierByPhoneNumber(principal.getName());
         List<Order> orders = orderRepository.findOrdersByCourierId(courier.getId());
 
         for (Order order : orders) {

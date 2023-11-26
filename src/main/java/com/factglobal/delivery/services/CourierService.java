@@ -3,7 +3,6 @@ package com.factglobal.delivery.services;
 
 import com.factglobal.delivery.models.Courier;
 import com.factglobal.delivery.repositories.CourierRepository;
-import com.factglobal.delivery.util.common.Mapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class CourierService {
     private final CourierRepository courierRepository;
-    private final Mapper mapper;
 
     public Courier findCourier(int id) {
         return courierRepository.findById(id)
@@ -30,7 +28,7 @@ public class CourierService {
                 .getId();
     }
 
-    public List<Courier> findAllCourier() {
+    public List<Courier> findAllCouriers() {
         List<Courier> orders = courierRepository.findAll();
 
         if (orders.isEmpty())

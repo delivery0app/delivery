@@ -23,7 +23,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
 
-    public ResponseEntity<?> createAuthToken(JwtRequest authRequest) {
+    public ResponseEntity<?> createAuthToken(JwtRequest authRequest){
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getPhoneNumber(), authRequest.getPassword()));
         } catch (BadCredentialsException e) {
@@ -35,19 +35,19 @@ public class AuthService {
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
-    public ResponseEntity<?> createNewCourier(RegistrationCourierDto registrationCourierDto) {
+    public ResponseEntity<UserDto> createNewCourier(RegistrationCourierDto registrationCourierDto) {
         User user = userService.createNewCourier(registrationCourierDto);
 
         return ResponseEntity.ok(new UserDto(user.getId(), user.getUsername()));
     }
 
-    public ResponseEntity<?> createNewCustomer(RegistrationCustomerDto registrationCustomerDto) {
+    public ResponseEntity<UserDto> createNewCustomer(RegistrationCustomerDto registrationCustomerDto) {
         User user = userService.createNewCustomer(registrationCustomerDto);
 
         return ResponseEntity.ok(new UserDto(user.getId(), user.getUsername()));
     }
 
-    public ResponseEntity<?> createNewAdmin(RegistrationAdminDTO registrationAdminDTO) {
+    public ResponseEntity<UserDto> createNewAdmin(RegistrationAdminDTO registrationAdminDTO) {
         User user = userService.createNewAdmin(registrationAdminDTO);
 
         return ResponseEntity.ok(new UserDto(user.getId(), user.getUsername()));

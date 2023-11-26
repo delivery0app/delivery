@@ -7,6 +7,7 @@ import com.factglobal.delivery.dto.security.RegistrationCustomerDto;
 import com.factglobal.delivery.services.AuthService;
 import com.factglobal.delivery.util.common.Mapper;
 import com.factglobal.delivery.util.exception_handling.ErrorValidation;
+import com.factglobal.delivery.util.validation.AdminValidator;
 import com.factglobal.delivery.util.validation.CourierValidator;
 import com.factglobal.delivery.util.validation.CustomerValidator;
 import com.factglobal.delivery.util.validation.PasswordsMatching;
@@ -26,6 +27,7 @@ public class AuthController {
     private final PasswordsMatching passwordsMatching;
     private final CustomerValidator customerValidator;
     private final CourierValidator courierValidator;
+    private final AdminValidator adminValidator;
     private final Mapper mapper;
 
     @PostMapping("/auth")
@@ -35,7 +37,7 @@ public class AuthController {
 
     @PostMapping("/registration/courier")
     public ResponseEntity<?> createNewUser(@RequestBody @Valid RegistrationCourierDto registrationCourierDto,
-                                           BindingResult bindingResult) {
+                                                 BindingResult bindingResult) {
         passwordsMatching.validate(registrationCourierDto, bindingResult);
         courierValidator.validate(mapper.convertToCourier(registrationCourierDto), bindingResult);
         ErrorValidation.message(bindingResult);
@@ -57,6 +59,7 @@ public class AuthController {
     public ResponseEntity<?> createNewUser(@RequestBody @Valid RegistrationAdminDTO registrationAdminDTO,
                                            BindingResult bindingResult) {
         passwordsMatching.validate(registrationAdminDTO, bindingResult);
+        adminValidator.validate(registrationAdminDTO, bindingResult);
         ErrorValidation.message(bindingResult);
 
         return authService.createNewAdmin(registrationAdminDTO);

@@ -17,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,7 +27,6 @@ public class CourierController {
     private final UserService userService;
     private final CourierValidator courierValidator;
     private final Mapper mapper;
-
 
     @GetMapping
     public CourierDTO getCourier(Principal principal) {
