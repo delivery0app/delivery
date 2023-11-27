@@ -1,5 +1,6 @@
 package com.factglobal.delivery.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

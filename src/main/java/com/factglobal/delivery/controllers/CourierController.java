@@ -7,7 +7,8 @@ import com.factglobal.delivery.services.UserService;
 import com.factglobal.delivery.util.common.Mapper;
 import com.factglobal.delivery.util.exception_handling.ErrorValidation;
 import com.factglobal.delivery.util.validation.CourierValidator;
-import com.factglobal.delivery.util.validation.PasswordsMatching;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,17 +17,18 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/couriers")
+@Tag(name = "Courier",description = "Методы для работы с пользователем курьером")
 public class CourierController {
     private final CourierService courierService;
     private final UserService userService;
     private final CourierValidator courierValidator;
     private final Mapper mapper;
 
+    @Operation(summary = "Получение информации о текущем пользователе Courier")
     @GetMapping
     public CourierDTO getCourier(Principal principal) {
         Courier courier = courierService.findCourierByPhoneNumber(principal.getName());
@@ -34,6 +36,7 @@ public class CourierController {
         return mapper.convertToCourierDTO(courier);
     }
 
+    @Operation(summary = "Редактирование текущего пользователя Courier")
     @PutMapping
     public ResponseEntity<?> editCourier(@RequestBody @Valid CourierDTO courierDTO,
                                          BindingResult bindingResult,
@@ -50,6 +53,7 @@ public class CourierController {
         return response;
     }
 
+    @Operation(summary = "Удаление текущего пользователя Courier")
     @DeleteMapping
     public ResponseEntity<?> deleteCourier(Principal principal) {
         ResponseEntity<?> response = userService.deleteUser(userService.findByPhoneNumber(principal.getName()).orElse(null).getId());
