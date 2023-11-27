@@ -11,10 +11,4 @@ public class DeliveryApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(DeliveryApplication.class, args);
 	}
-
-	@Bean
-	public ModelMapper modelMapper(){
-		return new ModelMapper();
-	}
-
 }
