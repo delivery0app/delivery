@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class Mapper {
-    private final ModelMapper modelMapper;
+    private final ModelMapper modelMapper = new ModelMapper();
 
     public Order convertToOrder(OrderDTO orderDTO) {
         return modelMapper.map(orderDTO, Order.class);
