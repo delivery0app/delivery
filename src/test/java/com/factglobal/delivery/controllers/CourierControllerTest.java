@@ -64,7 +64,7 @@ class CourierControllerTest {
     }
 
     @Nested
-    class getCourierTest {
+    class getCourierTests {
         @Test
         void getCourier_CourierRole_ReturnsCourier() throws Exception {
             when(courierService.findCourierByPhoneNumber(user.getPhoneNumber())).thenReturn(courier);
@@ -92,7 +92,7 @@ class CourierControllerTest {
     }
 
     @Nested
-    class editCourierTest {
+    class editCourierTests {
         @Test
         void editCourier_CourierRole_InvalidInput_ReturnsResponseOkAndCourier() throws Exception {
             when(mapper.convertToCourier(courierDTO)).thenReturn(courier);
@@ -130,7 +130,7 @@ class CourierControllerTest {
     }
 
     @Nested
-    class deleteCourierTest {
+    class deleteCourierTests {
         @Test
         void editCourier_CourierRole_ReturnsResponseOkAndCourier() throws Exception {
             String response = "User with phone number:" + user.getPhoneNumber() + " is delete";

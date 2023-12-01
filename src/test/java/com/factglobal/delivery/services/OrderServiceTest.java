@@ -52,10 +52,19 @@ class OrderServiceTest {
         customer = new Customer(1, "John", "+79999999902", "customer@gmail.com", Collections.singletonList(order), user);
         courier = new Courier(1, "John", "123412341234",
                 "+79999999902", "courier6@gmail.com", Courier.Status.BUSY, user, Collections.singletonList(order));
-        order = new Order(1, "Moscow", "Paris", 7, null,
-                OrderBPM.PaymentMethod.CASH, OrderBPM.State.IN_PROGRESS, null, 632,
-                null, false, 0, courier, customer);
 
+        order = Order.builder()
+                .id(1)
+                .senderAddress("Moscow")
+                .deliveryAddress("Paris")
+                .weight(7)
+                .paymentMethod(OrderBPM.PaymentMethod.CASH)
+                .orderStatus(OrderBPM.State.IN_PROGRESS)
+                .distance(632)
+                .fragileCargo(false)
+                .courier(courier)
+                .customer(customer)
+                .build();
         when(orderRepository.save(order))
                 .thenReturn(order);
         when(orderRepository.findById(order.getId()))
@@ -290,10 +299,10 @@ class OrderServiceTest {
         when(orderRepository.findOrdersByOrderStatus(order.getOrderStatus()))
                 .thenReturn(Collections.emptyList());
 
-        assertThrows(NoSuchElementException.class, () ->orderService.findAllOrders());
-        assertThrows(NoSuchElementException.class, () ->orderService.findOrdersByCourier(courier.getId()));
-        assertThrows(NoSuchElementException.class, () ->orderService.findOrdersByCustomer(customer.getId()));
-        assertThrows(NoSuchElementException.class, () ->orderService.findOrdersByStatus("new"));
+        assertThrows(NoSuchElementException.class, () -> orderService.findAllOrders());
+        assertThrows(NoSuchElementException.class, () -> orderService.findOrdersByCourier(courier.getId()));
+        assertThrows(NoSuchElementException.class, () -> orderService.findOrdersByCustomer(customer.getId()));
+        assertThrows(NoSuchElementException.class, () -> orderService.findOrdersByStatus("new"));
     }
 
     @Test
@@ -309,17 +318,17 @@ class OrderServiceTest {
         when(orderRepository.findOrdersByCustomerId(customer.getId()))
                 .thenReturn(Collections.singletonList(order));
 
-        assertThrows(IllegalStateException.class, () ->orderService.cancelOrderByCustomer(order.getId(), principal));
-        assertThrows(IllegalStateException.class, () ->orderService.editOrderByCustomer(order, order.getId(), principal));
-        assertThrows(IllegalStateException.class, () ->orderService.cancelOrderByCustomer(order.getId(), principal));
-        assertThrows(IllegalStateException.class, () ->orderService.deleteOrder(order.getId()));
-        assertThrows(IllegalStateException.class, () ->orderService.assignCourierToOrder(order.getId(), courier.getId()));
+        assertThrows(IllegalStateException.class, () -> orderService.cancelOrderByCustomer(order.getId(), principal));
+        assertThrows(IllegalStateException.class, () -> orderService.editOrderByCustomer(order, order.getId(), principal));
+        assertThrows(IllegalStateException.class, () -> orderService.cancelOrderByCustomer(order.getId(), principal));
+        assertThrows(IllegalStateException.class, () -> orderService.deleteOrder(order.getId()));
+        assertThrows(IllegalStateException.class, () -> orderService.assignCourierToOrder(order.getId(), courier.getId()));
 
         order.setOrderStatus(OrderBPM.State.NEW);
         courier.setCourierStatus(Courier.Status.FREE);
 
-        assertThrows(IllegalStateException.class, () ->orderService.deliveredOrder(order.getId(), principal));
-        assertThrows(IllegalStateException.class, () ->orderService.releaseCourierFromOrder(order.getId(), courier.getId()));
+        assertThrows(IllegalStateException.class, () -> orderService.deliveredOrder(order.getId(), principal));
+        assertThrows(IllegalStateException.class, () -> orderService.releaseCourierFromOrder(order.getId(), courier.getId()));
     }
 
     @Test

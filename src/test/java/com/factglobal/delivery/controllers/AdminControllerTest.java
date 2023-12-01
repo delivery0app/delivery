@@ -79,7 +79,7 @@ class AdminControllerTest {
     }
 
     @Nested
-    class blockUserTest {
+    class blockUserTests {
         @Test
         void blockUser_AdminRole_ValidInput_ReturnsResponseEntityOk() throws Exception{
             when(userService.blockUser(user.getId()))
@@ -104,7 +104,7 @@ class AdminControllerTest {
     }
 
     @Nested
-    class unblockUserTest {
+    class unblockUserTests {
         @Test
         void unblockUser_AdminRole_ValidInput_ReturnsResponseEntityOk() throws Exception{
             when(userService.unblockUser(user.getId()))
@@ -129,7 +129,7 @@ class AdminControllerTest {
     }
 
     @Nested
-    class deleteUserTest {
+    class deleteUserTests {
         @Test
         void deleteUser_AdminRole_ValidInput_ReturnsResponseEntityOkAndString() throws Exception{
             String response = "User with phone number:" + user.getPhoneNumber() + " is delete";
@@ -156,7 +156,7 @@ class AdminControllerTest {
     }
 
     @Nested
-    class editCourierTest {
+    class editCourierTests {
         @Test
         void editCourier_AdminRole_ValidInput_ReturnsResponseEntityOkAndCourier() throws Exception{
             when(mapper.convertToCourier(courierDTO)).thenReturn(courier);
@@ -191,7 +191,7 @@ class AdminControllerTest {
     }
 
     @Nested
-    class editCustomerTest {
+    class editCustomerTests {
         @Test
         void editCustomer_AdminRole_ValidInput_ReturnsResponseEntityOkAndCustomer() throws Exception{
             when(mapper.convertToCustomer(customerDTO))
@@ -227,7 +227,7 @@ class AdminControllerTest {
     }
 
     @Nested
-    class getAllCouriersTest {
+    class getAllCouriersTests {
         @Test
         void getAllCouriers_AdminRole_ValidInput_ReturnsAllCouriersDTO() throws Exception {
             List<Courier> courierList = Collections.singletonList(courier);
@@ -259,7 +259,7 @@ class AdminControllerTest {
     }
 
     @Nested
-    class getAllCustomersTest {
+    class getAllCustomersTests {
         @Test
         void getAllCustomer_AdminRole_ValidInput_ReturnsAllCustomersDTO() throws Exception {
             List<Customer> customersList = Collections.singletonList(customer);
