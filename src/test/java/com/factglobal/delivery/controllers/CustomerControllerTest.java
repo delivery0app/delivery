@@ -63,7 +63,7 @@ class CustomerControllerTest {
     }
 
     @Nested
-    class getCustomerTest {
+    class getCustomerTests {
         @Test
         void getCustomer_CustomerRole_ReturnsCustomer() throws Exception {
             when(customerService.findCustomerByPhoneNumber(user.getPhoneNumber()))
@@ -93,7 +93,7 @@ class CustomerControllerTest {
     }
 
     @Nested
-    class editCustomerTest {
+    class editCustomerTests {
         @Test
         void editCustomer_CustomerRole_ValidInput_ReturnsResponseOkAndCustomer() throws Exception {
             when(mapper.convertToCustomer(customerDTO)).thenReturn(customer);
@@ -131,7 +131,7 @@ class CustomerControllerTest {
     }
 
     @Nested
-    class deleteCustomerTest {
+    class deleteCustomerTests {
         @Test
         void deleteCustomer_CustomerRole_ReturnsResponseOkAndCustomer() throws Exception {
             String response = "User with phone number:" + user.getPhoneNumber() + " is delete";

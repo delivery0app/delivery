@@ -47,19 +47,20 @@ class OrderRepositoryTest {
         customer.setPhoneNumber("+79999999999");
         customer.setEmail("customer@gmail.com");
 
-        order = new Order();
-        order.setSenderAddress("Sender Address");
-        order.setDeliveryAddress("Delivery Address");
-        order.setWeight(5);
-        order.setDescription("Description");
-        order.setPaymentMethod(OrderBPM.PaymentMethod.CASH);
-        order.setOrderStatus(OrderBPM.State.NEW);
-        order.setDeliveryDate(LocalDate.now());
-        order.setCreationDate(LocalDateTime.now());
-        order.setFragileCargo(true);
-        order.setPrice(50.0);
-        order.setCourier(courier);
-        order.setCustomer(customer);
+        order = Order.builder()
+                .senderAddress("Sender Address")
+                .deliveryAddress("Delivery Address")
+                .weight(5)
+                .description("Description")
+                .paymentMethod(OrderBPM.PaymentMethod.CASH)
+                .orderStatus(OrderBPM.State.NEW)
+                .fragileCargo(true)
+                .deliveryDate(LocalDate.now())
+                .creationDate(LocalDateTime.now())
+                .price(50.0)
+                .customer(customer)
+                .courier(courier).build();
+
 
         courierRepository.save(courier);
         customerRepository.save(customer);
