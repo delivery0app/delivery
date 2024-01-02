@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.BindingResult;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -56,11 +57,27 @@ class CourierControllerTest {
 
     @BeforeEach
     void setUp() {
-        user = new User(3, "+79999999902", "100100100Gt", null, false, courier, null);
-        courier = new Courier(1, "John", "123412341234",
-                "+79999999902", "courier6@gmail.com", Courier.Status.FREE, user, null);
-        courierDTO = new CourierDTO("John", "123412341234",
-                "+79999999902", "courier6@gmail.com", Courier.Status.FREE);
+        user = new User();
+        user.setId(3);
+        user.setPhoneNumber("+79999999902");
+        user.setPassword("100100100Gt");
+        user.setCourier(courier);
+
+        courier = new Courier();
+        courier.setId(1);
+        courier.setName("John");
+        courier.setInn("123412341234");
+        courier.setPhoneNumber("+79999999902");
+        courier.setEmail("courier6@gmail.com");
+        courier.setCourierStatus(Courier.Status.FREE);
+        courier.setUser(user);
+
+        courierDTO = new CourierDTO();
+        courierDTO.setName("John");
+        courierDTO.setInn("123412341234");
+        courierDTO.setPhoneNumber("+79999999902");
+        courierDTO.setEmail("courier6@gmail.com");
+        courierDTO.setCourierStatus(Courier.Status.FREE);
     }
 
     @Nested
@@ -70,23 +87,24 @@ class CourierControllerTest {
             when(courierService.findCourierByPhoneNumber(user.getPhoneNumber())).thenReturn(courier);
             when(mapper.convertToCourierDTO(courier)).thenReturn(courierDTO);
 
-            mockMvc.perform(get("/couriers")
-                            .with(user("+79999999902").roles("COURIER"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+            var result = mockMvc.perform(get("/couriers")
+                    .with(user("+79999999902").roles("COURIER"))
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(content().json(objectMapper.writeValueAsString(courierDTO)));
-
             verify(courierService, times(1)).findCourierByPhoneNumber(user.getPhoneNumber());
             verify(mapper, times(1)).convertToCourierDTO(courier);
         }
 
         @Test
         void getCourier_AdminRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
-            mockMvc.perform(get("/couriers")
-                            .with(user("+79999999902").roles("ADMIN"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+            var result = mockMvc.perform(get("/couriers")
+                    .with(user("+79999999902").roles("ADMIN"))
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isForbidden());
         }
     }
@@ -104,14 +122,14 @@ class CourierControllerTest {
                     .thenReturn(ResponseEntity.ok(courier));
             doNothing().when(courierValidator).validate(eq(courier), any(BindingResult.class));
 
-            mockMvc.perform(put("/couriers")
-                            .with(user("+79999999902").roles("COURIER"))
-                            .content(objectMapper.writeValueAsString(courierDTO))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+            var result = mockMvc.perform(put("/couriers")
+                    .with(user("+79999999902").roles("COURIER"))
+                    .content(objectMapper.writeValueAsString(courierDTO))
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(content().json(objectMapper.writeValueAsString(courier)));
-
             verify(mapper, times(1)).convertToCourier(courierDTO);
             verify(userService, times(1)).findByPhoneNumber(user.getPhoneNumber());
             verify(courierService, times(1)).findCourierUserId(user.getId());
@@ -121,10 +139,11 @@ class CourierControllerTest {
 
         @Test
         void editCourier_AdminRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
-            mockMvc.perform(put("/couriers")
-                            .with(user("+79999999902").roles("ADMIN"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+            var result = mockMvc.perform(put("/couriers")
+                    .with(user("+79999999902").roles("ADMIN"))
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isForbidden());
         }
     }
@@ -140,20 +159,22 @@ class CourierControllerTest {
             when(userService.findByPhoneNumber(user.getPhoneNumber()))
                     .thenReturn(Optional.of(user));
 
-            mockMvc.perform(delete("/couriers")
-                            .with(user("+79999999902").roles("COURIER"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+            var result = mockMvc.perform(delete("/couriers")
+                    .with(user("+79999999902").roles("COURIER"))
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(content().string(response));
         }
 
         @Test
         void deleteCourier_AdminRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
-            mockMvc.perform(delete("/couriers")
-                            .with(user("+79999999902").roles("ADMIN"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+            var result = mockMvc.perform(delete("/couriers")
+                    .with(user("+79999999902").roles("ADMIN"))
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isForbidden());
         }
     }

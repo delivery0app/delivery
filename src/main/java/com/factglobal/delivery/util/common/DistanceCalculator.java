@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 @Component
 public class DistanceCalculator {
-    private static final double EARTH_RADIUS = 6371000; // Радиус Земли в метрах
+    private static final double EARTH_RADIUS = 6371000; // Earth radius in meters
 
     public int getDistance(String city1, String city2) throws IOException{
         HashMap<String, Double> coordinateCity1 = getCoordinate(city1);
@@ -28,7 +28,7 @@ public class DistanceCalculator {
         return (int) Math.round(calculateDistance(city1Lat, city1Lon, city2Lat, city2Lon));
     }
 
-    //Получение координат города
+    // Get coordinates of a city
     private HashMap<String, Double> getCoordinate(String city) throws IOException{
         String query = URLEncoder.encode(city, StandardCharsets.UTF_8);
         String url = "https://nominatim.openstreetmap.org/search?q=" + query + "&format=json";
@@ -65,25 +65,26 @@ public class DistanceCalculator {
 
 
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        // Переводим координаты городов из градусов в радианы
+        // Convert city coordinates from degrees to radians
         double lat1Rad = Math.toRadians(lat1);
         double lon1Rad = Math.toRadians(lon1);
         double lat2Rad = Math.toRadians(lat2);
         double lon2Rad = Math.toRadians(lon2);
 
-        // Разница между долготами и широтами городов
+        // Difference in latitudes and longitudes
         double deltaLat = lat2Rad - lat1Rad;
         double deltaLon = lon2Rad - lon1Rad;
 
-        // Формула гаверсинусов
+        // Haversine formula
         double a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
                 Math.cos(lat1Rad) * Math.cos(lat2Rad) *
                         Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        // Вычисляем расстояние в метрах
+        // Calculate distance in meters
         double distance = EARTH_RADIUS * c;
-        // Отправляем расстояние в киллометрах
+
+        // Convert distance to kilometers
         return distance / 1000;
     }
 }

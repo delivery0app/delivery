@@ -48,10 +48,29 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        User user = new User(3, "+79999999902", "100100100Gt", customer, false, null, null);
-        customer = new Customer(1, "John", "+79999999902", "customer@gmail.com", Collections.singletonList(order), user);
-        courier = new Courier(1, "John", "123412341234",
-                "+79999999902", "courier6@gmail.com", Courier.Status.BUSY, user, Collections.singletonList(order));
+        User user = new User();
+        user.setId(3);
+        user.setPhoneNumber("+79999999902");
+        user.setPassword("100100100Gt");
+        user.setCustomer(customer);
+
+        customer = new Customer();
+        customer.setId(1);
+        customer.setName("John");
+        customer.setPhoneNumber("+79999999902");
+        customer.setEmail("customer@gmail.com");
+        customer.setOrders(Collections.singletonList(order));
+        customer.setUser(user);
+
+        courier = new Courier();
+        courier.setId(1);
+        courier.setName("John");
+        courier.setInn("123412341234");
+        courier.setPhoneNumber("+79999999902");
+        courier.setEmail("courier6@gmail.com");
+        courier.setCourierStatus(Courier.Status.BUSY);
+        courier.setUser(user);
+        courier.setOrders(Collections.singletonList(order));
 
         order = Order.builder()
                 .id(1)
@@ -65,6 +84,7 @@ class OrderServiceTest {
                 .courier(courier)
                 .customer(customer)
                 .build();
+
         when(orderRepository.save(order))
                 .thenReturn(order);
         when(orderRepository.findById(order.getId()))
