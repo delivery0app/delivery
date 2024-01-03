@@ -55,6 +55,3 @@ CREATE TABLE order_table
     courier_id       BIGINT       REFERENCES courier (id) ON DELETE SET NULL,
     customer_id      BIGINT       NOT NULL REFERENCES customer (id) ON DELETE SET NULL
 );
-
-
-INSERT INTO role (name) VALUES ('ROLE_COURIER'), ('ROLE_CUSTOMER'), ('ROLE_ADMIN');
