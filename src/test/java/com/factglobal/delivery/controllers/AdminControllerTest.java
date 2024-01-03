@@ -69,13 +69,39 @@ class AdminControllerTest {
 
     @BeforeEach
     void setUp() {
-        user = new User(3, "+79999999902", "100100100Gt", null, false, courier, null);
-        courier = new Courier(1, "John", "123412341234",
-                "+79999999902", "courier6@gmail.com", Courier.Status.FREE, user, null);
-        courierDTO = new CourierDTO("John", "123412341234",
-                "+79999999902", "courier6@gmail.com", Courier.Status.FREE);
-        customer = new Customer(1, "John", "+79999999902", "customer@gmail.com", null, user);
-        customerDTO = new CustomerDTO("John", "+79999999902", "customer@gmail.com");
+        user = new User();
+        user.setId(3);
+        user.setPhoneNumber("+79999999902");
+        user.setPassword("100100100Gt");
+        user.setCourier(courier);
+
+        courier = new Courier();
+        courier.setId(1);
+        courier.setName("John");
+        courier.setInn("123412341234");
+        courier.setPhoneNumber("+79999999902");
+        courier.setEmail("courier6@gmail.com");
+        courier.setCourierStatus(Courier.Status.FREE);
+        courier.setUser(user);
+
+        courierDTO = new CourierDTO();
+        courierDTO.setName("John");
+        courierDTO.setInn("123412341234");
+        courierDTO.setPhoneNumber("+79999999902");
+        courierDTO.setEmail("courier6@gmail.com");
+        courierDTO.setCourierStatus(Courier.Status.FREE);
+
+        customer = new Customer();
+        customer.setId(1);
+        customer.setName("John");
+        customer.setPhoneNumber("+79999999902");
+        customer.setEmail("customer@gmail.com");
+        customer.setUser(user);
+
+        customerDTO = new CustomerDTO();
+        customerDTO.setName("John");
+        customerDTO.setPhoneNumber("+79999999902");
+        customerDTO.setEmail("customer@gmail.com");
     }
 
     @Nested
@@ -85,20 +111,21 @@ class AdminControllerTest {
             when(userService.blockUser(user.getId()))
                     .thenReturn(ResponseEntity.ok().build());
 
-            mockMvc.perform(post("/admins/users/{user_id}/block", user.getId())
-                            .with(user("+79999999902").roles("ADMIN")))
-                    .andDo(print())
-                    .andExpect(status().isOk());
+            var result = mockMvc.perform(post("/admins/users/{user_id}/block", user.getId())
+                            .with(user("+79999999902").roles("ADMIN")));
 
+            result.andDo(print())
+                    .andExpect(status().isOk());
             verify(userService, times(1)).blockUser(user.getId());
         }
 
         @Test
         void blockUser_CustomerRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
-            mockMvc.perform(post("/admins/users/{user_id}/block", user.getId())
+            var result = mockMvc.perform(post("/admins/users/{user_id}/block", user.getId())
                             .with(user("+79999999902").roles("CUSTOMER"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+                            .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isForbidden());
         }
     }
@@ -110,20 +137,21 @@ class AdminControllerTest {
             when(userService.unblockUser(user.getId()))
                     .thenReturn(ResponseEntity.ok().build());
 
-            mockMvc.perform(post("/admins/users/{user_id}/unblock", user.getId())
-                            .with(user("+79999999902").roles("ADMIN")))
-                    .andDo(print())
-                    .andExpect(status().isOk());
+            var result = mockMvc.perform(post("/admins/users/{user_id}/unblock", user.getId())
+                            .with(user("+79999999902").roles("ADMIN")));
 
+            result.andDo(print())
+                    .andExpect(status().isOk());
             verify(userService, times(1)).unblockUser(user.getId());
         }
 
         @Test
         void unblockUser_CustomerRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
-            mockMvc.perform(post("/admins/users/{user_id}/unblock", user.getId())
+            var result = mockMvc.perform(post("/admins/users/{user_id}/unblock", user.getId())
                             .with(user("+79999999902").roles("CUSTOMER"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+                            .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isForbidden());
         }
     }
@@ -137,20 +165,21 @@ class AdminControllerTest {
             when(userService.deleteUser(user.getId()))
                     .thenReturn(ResponseEntity.ok(response));
 
-            mockMvc.perform(delete("/admins/{user_id}", user.getId())
-                            .with(user("+79999999902").roles("ADMIN")))
-                    .andDo(print())
-                    .andExpect(status().isOk());
+            var result = mockMvc.perform(delete("/admins/{user_id}", user.getId())
+                            .with(user("+79999999902").roles("ADMIN")));
 
+            result.andDo(print())
+                    .andExpect(status().isOk());
             verify(userService, times(1)).deleteUser(user.getId());
         }
 
         @Test
         void deleteUser_CustomerRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
-            mockMvc.perform(delete("/admins/{user_id}", user.getId())
+            var result = mockMvc.perform(delete("/admins/{user_id}", user.getId())
                             .with(user("+79999999902").roles("CUSTOMER"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+                            .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isForbidden());
         }
     }
@@ -166,14 +195,14 @@ class AdminControllerTest {
             when(userService.editCourier(courier, user.getId()))
                     .thenReturn(ResponseEntity.ok(courier));
 
-            mockMvc.perform(put("/admins/couriers/{user_id}", user.getId())
+            var result = mockMvc.perform(put("/admins/couriers/{user_id}", user.getId())
                             .with(user("+79999999902").roles("ADMIN"))
                             .content(objectMapper.writeValueAsString(courierDTO))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+                            .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(content().json(objectMapper.writeValueAsString(courier)));
-
             verify(mapper, times(1)).convertToCourier(courierDTO);
             verify(courierService, times(1)).findCourierUserId(user.getId());
             verify(courierValidator, times(1)).validate(eq(courier), any(BindingResult.class));
@@ -182,10 +211,11 @@ class AdminControllerTest {
 
         @Test
         void editCourier_CustomerRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
-            mockMvc.perform(put("/admins/couriers/{user_id}", user.getId())
+            var result = mockMvc.perform(put("/admins/couriers/{user_id}", user.getId())
                             .with(user("+79999999902").roles("CUSTOMER"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+                            .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isForbidden());
         }
     }
@@ -202,14 +232,14 @@ class AdminControllerTest {
             when(userService.editCustomer(customer, user.getId()))
                     .thenReturn(ResponseEntity.ok(customer));
 
-            mockMvc.perform(put("/admins/customers/{user_id}", user.getId())
+            var result = mockMvc.perform(put("/admins/customers/{user_id}", user.getId())
                             .with(user("+79999999902").roles("ADMIN"))
                             .content(objectMapper.writeValueAsString(customerDTO))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+                            .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(content().json(objectMapper.writeValueAsString(customer)));
-
             verify(mapper, times(1)).convertToCustomer(customerDTO);
             verify(customerService, times(1)).findCustomerByUserId(user.getId());
             verify(customerValidator, times(1)).validate(eq(customer), any(BindingResult.class));
@@ -218,10 +248,11 @@ class AdminControllerTest {
 
         @Test
         void editCustomer_CourierRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
-            mockMvc.perform(put("/admins/customers/{user_id}", user.getId())
+            var result = mockMvc.perform(put("/admins/customers/{user_id}", user.getId())
                             .with(user("+79999999902").roles("COURIER"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+                            .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isForbidden());
         }
     }
@@ -238,22 +269,23 @@ class AdminControllerTest {
             when(mapper.convertToCourierDTO(courier))
                     .thenReturn(courierDTO);
 
-            mockMvc.perform(get("/admins/couriers")
-                            .with(user("+79999999902").roles("ADMIN")))
-                    .andDo(print())
+            var result = mockMvc.perform(get("/admins/couriers")
+                            .with(user("+79999999902").roles("ADMIN")));
+
+            result.andDo(print())
                     .andExpect(content().json(
                             objectMapper.writeValueAsString(courierDTOList)));
-
             verify(courierService, times(1)).findAllCouriers();
             verify(mapper, times(courierList.size())).convertToCourierDTO(courier);
         }
 
         @Test
         void getAllCouriers_CustomerRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
-            mockMvc.perform(get("/admins/couriers")
+            var result = mockMvc.perform(get("/admins/couriers")
                             .with(user("+79999999902").roles("COURIER"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+                            .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isForbidden());
         }
     }
@@ -270,22 +302,23 @@ class AdminControllerTest {
             when(mapper.convertToCustomerDTO(customer))
                     .thenReturn(customerDTO);
 
-            mockMvc.perform(get("/admins/customers")
-                            .with(user("+79999999902").roles("ADMIN")))
-                    .andDo(print())
+            var result = mockMvc.perform(get("/admins/customers")
+                            .with(user("+79999999902").roles("ADMIN")));
+
+            result.andDo(print())
                     .andExpect(content().json(
                             objectMapper.writeValueAsString(customerDTOList)));
-
             verify(customerService, times(1)).findAllCustomers();
             verify(mapper, times(customerDTOList.size())).convertToCustomerDTO(customer);
         }
 
         @Test
         void getAllCouriers_CustomerRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
-            mockMvc.perform(get("/admins/customers")
+            var result = mockMvc.perform(get("/admins/customers")
                             .with(user("+79999999902").roles("CUSTOMER"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+                            .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isForbidden());
         }
     }

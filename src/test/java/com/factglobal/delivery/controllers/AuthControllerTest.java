@@ -61,13 +61,29 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
-        registrationCourierDto = new RegistrationCourierDto("Test", "courier6@gmail.com",
-                "+79999999988", "123412341236", "100100100Gt", "100100100Gt");
-        registrationCustomerDto = new RegistrationCustomerDto("John", "customer@gmail.com",
-                "+79999999988", "100100100Gt", "100100100Gt");
-        registrationAdminDTO = new RegistrationAdminDTO("+79999999988",
-                "100100100Gt", "100100100Gt");
-        jwtRequest = new JwtRequest("+79999999988", "100100100Gt");
+        registrationCourierDto = new RegistrationCourierDto();
+        registrationCourierDto.setName("Test");
+        registrationCourierDto.setEmail("courier6@gmail.com");
+        registrationCourierDto.setPhoneNumber("+79999999988");
+        registrationCourierDto.setInn("123412341236");
+        registrationCourierDto.setPassword("100100100Gt");
+        registrationCourierDto.setConfirmPassword("100100100Gt");
+
+        registrationCustomerDto = new RegistrationCustomerDto();
+        registrationCustomerDto.setName("John");
+        registrationCustomerDto.setEmail("customer@gmail.com");
+        registrationCustomerDto.setPhoneNumber("+79999999988");
+        registrationCustomerDto.setPassword("100100100Gt");
+        registrationCustomerDto.setConfirmPassword("100100100Gt");
+
+        registrationAdminDTO = new RegistrationAdminDTO();
+        registrationAdminDTO.setPhoneNumber("+79999999988");
+        registrationAdminDTO.setPassword("100100100Gt");
+        registrationAdminDTO.setConfirmPassword("100100100Gt");
+
+        jwtRequest = new JwtRequest();
+        jwtRequest.setPhoneNumber("+79999999988");
+        jwtRequest.setPassword("100100100Gt");
     }
 
     @Test
@@ -79,13 +95,13 @@ class AuthControllerTest {
         doNothing().when(passwordsMatching).validate(eq(registrationCourierDto), any(BindingResult.class));
         doNothing().when(courierValidator).validate(eq(mapper.convertToCourier(registrationCourierDto)), any(BindingResult.class));
 
-        mockMvc.perform(post("/registration/courier")
+        var result = mockMvc.perform(post("/registration/courier")
                         .content(objectMapper.writeValueAsString(registrationCourierDto))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        result.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(mockUser)));
-
         verify(authService, times(1)).createNewCourier(registrationCourierDto);
         verify(passwordsMatching, times(1)).validate(eq(registrationCourierDto), any(BindingResult.class));
         verify(courierValidator, times(1)).validate(eq(mapper.convertToCourier(registrationCourierDto)), any(BindingResult.class));
@@ -100,13 +116,13 @@ class AuthControllerTest {
         doNothing().when(passwordsMatching).validate(eq(registrationCustomerDto), any(BindingResult.class));
         doNothing().when(customerValidator).validate(eq(mapper.convertToCustomer(registrationCustomerDto)), any(BindingResult.class));
 
-        mockMvc.perform(post("/registration/customer")
+        var result = mockMvc.perform(post("/registration/customer")
                         .content(objectMapper.writeValueAsString(registrationCustomerDto))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        result.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(mockUser)));
-
         verify(authService, times(1)).createNewCustomer(registrationCustomerDto);
         verify(passwordsMatching, times(1)).validate(eq(registrationCustomerDto), any(BindingResult.class));
         verify(customerValidator, times(1)).validate(eq(mapper.convertToCustomer(registrationCustomerDto)), any(BindingResult.class));
@@ -121,13 +137,13 @@ class AuthControllerTest {
         doNothing().when(passwordsMatching).validate(eq(registrationAdminDTO), any(BindingResult.class));
         doNothing().when(adminValidator).validate(eq(registrationAdminDTO), any(BindingResult.class));
 
-        mockMvc.perform(post("/registration/admin")
+        var result = mockMvc.perform(post("/registration/admin")
                         .content(objectMapper.writeValueAsString(registrationAdminDTO))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        result.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(mockUser)));
-
         verify(authService, times(1)).createNewAdmin(registrationAdminDTO);
         verify(passwordsMatching, times(1)).validate(eq(registrationAdminDTO), any(BindingResult.class));
         verify(adminValidator, times(1)).validate(eq(registrationAdminDTO), any(BindingResult.class));
@@ -137,10 +153,11 @@ class AuthControllerTest {
     void createAuthToken_ValidInput_ReturnsResponseEntityOk() throws Exception {
         when(authService.createAuthToken(jwtRequest)).thenReturn(ResponseEntity.ok().build());
 
-        mockMvc.perform(post("/auth")
+        var result = mockMvc.perform(post("/auth")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(jwtRequest)))
-                .andDo(print())
+                        .content(objectMapper.writeValueAsBytes(jwtRequest)));
+
+        result.andDo(print())
                 .andExpect(status().isOk());
 
         verify(authService, times(1)).createAuthToken(jwtRequest);

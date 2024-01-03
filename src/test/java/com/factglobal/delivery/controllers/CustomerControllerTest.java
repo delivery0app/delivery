@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.BindingResult;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -57,9 +58,23 @@ class CustomerControllerTest {
 
     @BeforeEach
     void setUp() {
-        user = new User(3, "+79999999902", "100100100Gt", customer, false, null, null);
-        customer = new Customer(1, "John", "+79999999902", "customer@gmail.com", null, user);
-        customerDTO = new CustomerDTO("John", "+79999999902", "customer@gmail.com");
+        user = new User();
+        user.setId(3);
+        user.setPhoneNumber("+79999999902");
+        user.setPassword("100100100Gt");
+        user.setCustomer(customer);
+
+        customer = new Customer();
+        customer.setId(1);
+        customer.setName("John");
+        customer.setPhoneNumber("+79999999902");
+        customer.setEmail("customer@gmail.com");
+        customer.setUser(user);
+
+        customerDTO = new CustomerDTO();
+        customerDTO.setName("John");
+        customerDTO.setPhoneNumber("+79999999902");
+        customerDTO.setEmail("customer@gmail.com");
     }
 
     @Nested
@@ -71,23 +86,24 @@ class CustomerControllerTest {
             when(mapper.convertToCustomerDTO(customer))
                     .thenReturn(customerDTO);
 
-            mockMvc.perform(get("/customers")
-                            .with(user("+79999999902").roles("CUSTOMER"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+            var result = mockMvc.perform(get("/customers")
+                    .with(user("+79999999902").roles("CUSTOMER"))
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(content().json(objectMapper.writeValueAsString(customerDTO)));
-
             verify(customerService, times(1)).findCustomerByPhoneNumber(user.getPhoneNumber());
             verify(mapper, times(1)).convertToCustomerDTO(customer);
         }
 
         @Test
         void getCustomer_AdminRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
-            mockMvc.perform(get("/customers")
-                            .with(user("+79999999902").roles("ADMIN"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+            var result = mockMvc.perform(get("/customers")
+                    .with(user("+79999999902").roles("ADMIN"))
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isForbidden());
         }
     }
@@ -105,14 +121,14 @@ class CustomerControllerTest {
             when(userService.editCustomer(customer, user.getId()))
                     .thenReturn(ResponseEntity.ok(customer));
 
-            mockMvc.perform(put("/customers")
-                            .with(user("+79999999902").roles("CUSTOMER"))
-                            .content(objectMapper.writeValueAsString(customerDTO))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+            var result = mockMvc.perform(put("/customers")
+                    .with(user("+79999999902").roles("CUSTOMER"))
+                    .content(objectMapper.writeValueAsString(customerDTO))
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(content().json(objectMapper.writeValueAsString(customer)));
-
             verify(mapper, times(1)).convertToCustomer(customerDTO);
             verify(userService, times(1)).findByPhoneNumber(user.getPhoneNumber());
             verify(customerService, times(1)).findCustomerByUserId(user.getId());
@@ -122,10 +138,11 @@ class CustomerControllerTest {
 
         @Test
         void editCustomer_AdminRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
-            mockMvc.perform(put("/customers")
-                            .with(user("+79999999902").roles("ADMIN"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+            var result = mockMvc.perform(put("/customers")
+                    .with(user("+79999999902").roles("ADMIN"))
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isForbidden());
         }
     }
@@ -141,20 +158,22 @@ class CustomerControllerTest {
             when(userService.findByPhoneNumber(user.getPhoneNumber()))
                     .thenReturn(Optional.of(user));
 
-            mockMvc.perform(delete("/customers")
-                            .with(user("+79999999902").roles("CUSTOMER"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+            var result = mockMvc.perform(delete("/customers")
+                    .with(user("+79999999902").roles("CUSTOMER"))
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(content().string(response));
         }
 
         @Test
         void deleteCustomer_AdminRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
-            mockMvc.perform(delete("/customers")
-                            .with(user("+79999999902").roles("ADMIN"))
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
+            var result = mockMvc.perform(delete("/customers")
+                    .with(user("+79999999902").roles("ADMIN"))
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andDo(print())
                     .andExpect(status().isForbidden());
         }
     }

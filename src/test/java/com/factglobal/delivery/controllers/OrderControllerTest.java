@@ -107,7 +107,7 @@ class OrderControllerTest {
 
             var result = mockMvc.perform(get("/orders"));
 
-            result.andExpect(status().isOk())
+            result.andDo(print()).andExpect(status().isOk())
                     .andExpect(content().json(objectMapper.writeValueAsString(orderDtoList)));
             verify(orderService, times(1)).findAllOrders();
         }
@@ -118,7 +118,7 @@ class OrderControllerTest {
                     .with(user("+79999999902").roles("CUSTOMER"))
                     .contentType(MediaType.APPLICATION_JSON));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -133,7 +133,7 @@ class OrderControllerTest {
             var result = mockMvc.perform(get("/orders/{order_id}", 1)
                     .contentType(MediaType.APPLICATION_JSON));
 
-            result.andExpect(status().isOk())
+            result.andDo(print()).andExpect(status().isOk())
                     .andExpect(jsonPath("$.senderAddress").value(orderDTO.getSenderAddress()))
                     .andExpect(jsonPath("$.deliveryAddress").value(orderDTO.getDeliveryAddress()))
                     .andExpect(jsonPath("$.weight").value(orderDTO.getWeight()));
@@ -148,7 +148,7 @@ class OrderControllerTest {
                     .with(user("+79999999902").roles("CUSTOMER"))
                     .contentType(MediaType.APPLICATION_JSON));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -171,7 +171,7 @@ class OrderControllerTest {
                     .content(objectMapper.writeValueAsString(orderDTO))
                     .principal(principal));
 
-            result.andExpect(status().isOk());
+            result.andDo(print()).andExpect(status().isOk());
             verify(customerService, times(1)).findCustomerByPhoneNumber(anyString());
             verify(orderService, times(1)).saveOrder(any(Order.class), anyInt());
         }
@@ -184,7 +184,7 @@ class OrderControllerTest {
                     .content(objectMapper.writeValueAsString(orderDTO))
                     .principal(principal));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -197,7 +197,7 @@ class OrderControllerTest {
 
             var result = mockMvc.perform(delete("/orders/{order_id}", 1));
 
-            result.andExpect(status().isOk());
+            result.andDo(print()).andExpect(status().isOk());
             verify(orderService, times(1)).deleteOrder(1);
         }
 
@@ -207,7 +207,7 @@ class OrderControllerTest {
                     .with(user("+79999999999").roles("CUSTOMER"))
                     .contentType(MediaType.APPLICATION_JSON));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -224,7 +224,7 @@ class OrderControllerTest {
                     .content(objectMapper.writeValueAsString(orderDTO))
                     .principal(principal));
 
-            result.andExpect(status().isOk());
+            result.andDo(print()).andExpect(status().isOk());
             verify(mapper, times(1)).convertToOrder(any(OrderDTO.class));
             verify(orderService, times(1)).editOrderByAdmin(any(Order.class), anyInt());
         }
@@ -237,7 +237,7 @@ class OrderControllerTest {
                     .content(objectMapper.writeValueAsString(orderDTO))
                     .principal(principal));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -254,7 +254,7 @@ class OrderControllerTest {
                     .content(objectMapper.writeValueAsString(orderDTO))
                     .principal(principal));
 
-            result.andExpect(status().isOk());
+            result.andDo(print()).andExpect(status().isOk());
             verify(mapper, times(1)).convertToOrder(any(OrderDTO.class));
             verify(orderService, times(1)).editOrderByCustomer(any(Order.class), anyInt(), any(Principal.class));
         }
@@ -267,7 +267,7 @@ class OrderControllerTest {
                     .content(objectMapper.writeValueAsString(orderDTO))
                     .principal(principal));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -292,7 +292,7 @@ class OrderControllerTest {
             var result = mockMvc.perform(get("/orders/customers")
                     .principal(principal));
 
-            result.andExpect(status().isOk())
+            result.andDo(print()).andExpect(status().isOk())
                     .andExpect(content().json(objectMapper.writeValueAsString(orderDtoList)));
             verify(customerService, times(1)).findCustomerByPhoneNumber(anyString());
             verify(orderService, times(1)).findOrdersByCustomer(anyInt());
@@ -304,7 +304,7 @@ class OrderControllerTest {
                     .with(user("+79999999999").roles("ADMIN"))
                     .principal(principal));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -321,7 +321,7 @@ class OrderControllerTest {
 
             var result = mockMvc.perform(get("/orders/customers/{customer_id}", 1));
 
-            result.andExpect(status().isOk())
+            result.andDo(print()).andExpect(status().isOk())
                     .andExpect(content().json(new ObjectMapper().writeValueAsString(orderDtoList)));
             verify(orderService, times(1)).findOrdersByCustomer(anyInt());
         }
@@ -331,7 +331,7 @@ class OrderControllerTest {
             var result = mockMvc.perform(get("/orders/customers/{customer_id}", 1)
                     .with(user("+79999999999").roles("CUSTOMER")));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -350,7 +350,7 @@ class OrderControllerTest {
 
             var result = mockMvc.perform(get("/orders/couriers/{courier_id}", 1));
 
-            result.andExpect(status().isOk())
+            result.andDo(print()).andExpect(status().isOk())
                     .andExpect(content().json(new ObjectMapper().writeValueAsString(orderDtoList)));
             verify(orderService, times(1)).findOrdersByCourier(anyInt());
         }
@@ -360,7 +360,7 @@ class OrderControllerTest {
             var result = mockMvc.perform(get("/orders/couriers/{courier_id}", 1)
                     .with(user("+79999999999").roles("CUSTOMER")));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -386,7 +386,7 @@ class OrderControllerTest {
             var result = mockMvc.perform(get("/orders/couriers")
                     .principal(principal));
 
-            result.andExpect(status().isOk())
+            result.andDo(print()).andExpect(status().isOk())
                     .andExpect(content().json(new ObjectMapper().writeValueAsString(orderDtoList)));
             verify(courierService, times(1)).findCourierByPhoneNumber(anyString());
             verify(orderService, times(1)).findOrdersByCourier(anyInt());
@@ -397,7 +397,8 @@ class OrderControllerTest {
             var result = mockMvc.perform(get("/orders/couriers")
                     .with(user("+79999999999").roles("CUSTOMER"))
                     .principal(principal));
-            result.andExpect(status().isForbidden());
+
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -410,7 +411,7 @@ class OrderControllerTest {
 
             var result = mockMvc.perform(put("/orders/{order_id}/cancel/admin", 1));
 
-            result.andExpect(status().isOk());
+            result.andDo(print()).andExpect(status().isOk());
             verify(orderService, times(1)).cancelOrderByAdmin(anyInt());
         }
 
@@ -418,7 +419,8 @@ class OrderControllerTest {
         void cancelOrderByAdmin_InvalidRole_WhenUnauthorized_ThrowsForbidden() throws Exception {
             var result = mockMvc.perform(put("/orders/{order_id}/cancel/admin", 1)
                     .with(user("+79999999999").roles("CUSTOMER")));
-            result.andExpect(status().isForbidden());
+
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -432,7 +434,7 @@ class OrderControllerTest {
             var result = mockMvc.perform(put("/orders/{order_id}/cancel", 1)
                     .principal(principal));
 
-            result.andExpect(status().isOk());
+            result.andDo(print()).andExpect(status().isOk());
             verify(orderService, times(1)).cancelOrderByCustomer(anyInt(), any(Principal.class));
         }
 
@@ -442,7 +444,7 @@ class OrderControllerTest {
                     .with(user("+79999999999").roles("ADMIN"))
                     .principal(principal));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -455,7 +457,7 @@ class OrderControllerTest {
 
             var result = mockMvc.perform(put("/orders/{order_id}/delivered/admin", 1));
 
-            result.andExpect(status().isOk());
+            result.andDo(print()).andExpect(status().isOk());
             verify(orderService, times(1)).deliveredOrder(1);
         }
 
@@ -464,7 +466,7 @@ class OrderControllerTest {
             var result = mockMvc.perform(put("/orders/{order_id}/delivered/admin", 1)
                     .with(user("+79999999999").roles("CUSTOMER")));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -478,7 +480,7 @@ class OrderControllerTest {
             var result = mockMvc.perform(put("/orders/{order_id}/delivered", 1)
                     .principal(principal));
 
-            result.andExpect(status().isOk());
+            result.andDo(print()).andExpect(status().isOk());
             verify(orderService, times(1)).deliveredOrder(eq(1), any(Principal.class));
         }
 
@@ -488,7 +490,7 @@ class OrderControllerTest {
                     .with(user("+79999999999").roles("CUSTOMER"))
                     .principal(principal));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -501,7 +503,7 @@ class OrderControllerTest {
 
             var result = mockMvc.perform(put("/orders/{order_id}/couriers/{courier_id}/assign", 1, 1));
 
-            result.andExpect(status().isOk());
+            result.andDo(print()).andExpect(status().isOk());
             verify(orderService, times(1)).assignCourierToOrder(1, 1);
         }
 
@@ -510,7 +512,7 @@ class OrderControllerTest {
             var result = mockMvc.perform(put("/orders/{order_id}/couriers/{courier_id}/assign", 1, 1)
                     .with(user("+79999999999").roles("CUSTOMER")));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -529,7 +531,7 @@ class OrderControllerTest {
             var result = mockMvc.perform(put("/orders/{order_id}/couriers/assign", 1)
                     .principal(principal));
 
-            result.andExpect(status().isOk());
+            result.andDo(print()).andExpect(status().isOk());
             verify(orderService, times(1)).assignCourierToOrder(1, courier.getId());
             verify(courierService, times(1)).findCourierByPhoneNumber(anyString());
         }
@@ -540,7 +542,7 @@ class OrderControllerTest {
                     .with(user("+79999999999").roles("CUSTOMER"))
                     .principal(principal));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -553,7 +555,7 @@ class OrderControllerTest {
 
             var result = mockMvc.perform(put("/orders/{order_id}/couriers/{courier_id}/release", 1, 1));
 
-            result.andExpect(status().isOk());
+            result.andDo(print()).andExpect(status().isOk());
             verify(orderService, times(1)).releaseCourierFromOrder(1, 1);
         }
 
@@ -562,7 +564,7 @@ class OrderControllerTest {
             var result = mockMvc.perform(put("/orders/{order_id}/couriers/{courier_id}/release", 1, 1)
                     .with(user("+79999999999").roles("CUSTOMER")));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 
@@ -580,7 +582,7 @@ class OrderControllerTest {
             var result = mockMvc.perform(get("/orders/status")
                     .param("status", String.valueOf(OrderBPM.State.NEW)));
 
-            result.andExpect(status().isOk())
+            result.andDo(print()).andExpect(status().isOk())
                     .andExpect(content().json(objectMapper.writeValueAsString(orderDtoList)));
             verify(orderService, times(1)).findOrdersByStatus(OrderBPM.State.NEW.toString());
         }
@@ -591,7 +593,7 @@ class OrderControllerTest {
                     .with(user("+79999999999").roles("CUSTOMER"))
                     .param("status", String.valueOf(OrderBPM.State.NEW)));
 
-            result.andExpect(status().isForbidden());
+            result.andDo(print()).andExpect(status().isForbidden());
         }
     }
 }
