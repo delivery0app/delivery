@@ -105,7 +105,7 @@ class OrderRepositoryTest {
     @Test
     void findOrdersByOrderStatus_ValidInput_ReturnsOrdersByStatus() {
         List<Order> result = orderRepository.findOrdersByOrderStatus(order.getOrderStatus());
-        assertThat(result.get(0).getCourier().getEmail()).isEqualTo(courier.getEmail());
+        assertThat(result.get(1).getCourier().getEmail()).isEqualTo(courier.getEmail());
     }
 
     @Test

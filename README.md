@@ -11,13 +11,15 @@
 Используемые технологии:
 - **Spring Boot v.3.1.4**
 - **Spring Data JPA**
+- **Spring Security** + **JWT**
 - **PostgreSql**
 - **FlyWay**
-- **Spring Security** + **JWT**
 - **Swagger**
 - **Junit** + **Mockito**
+- **Docker**
 
 Используемые паттерны проектирования:
+- **Builder**
   
 Настройки подключения к БД находятся по пути: 
 - **src/main/resources/application.properties**
