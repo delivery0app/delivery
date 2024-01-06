@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(description = "Необходимые данные для аутентификации пользователя")
+@Schema(description = "Required data for user authentication")
 public class JwtRequest {
-    @Schema(description = "Номер телефона существующего пользователя")
+    @Schema(description = "Existing user's phone number")
     private String phoneNumber;
-    @Schema(description = "Пароль пользователя")
+    @Schema(description = "User password")
     private String password;
 }

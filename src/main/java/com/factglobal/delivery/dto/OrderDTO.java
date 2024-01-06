@@ -16,46 +16,46 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Schema(description = "Информация о заказе")
+@Schema(description = "Information about order")
 public class OrderDTO {
-    @Schema(description = "Адрес отправителя")
+    @Schema(description = "Sender's address")
     @NotBlank(message = "Address should not be empty")
     @Size(min = 2, max = 100, message = "Address should be between 2 and 100 characters")
     private String senderAddress;
 
-    @Schema(description = "Адрес доставки")
+    @Schema(description = "Delivery address")
     @NotBlank(message = "Address should not be empty")
     @Size(min = 2, max = 100, message = "Address should be between 2 and 100 characters")
     private String deliveryAddress;
 
-    @Schema(description = "Вес заказа")
+    @Schema(description = "Order weight")
     @NotNull(message = "Weight should not be empty")
     @Min(value = 0, message = "Weight should be greater than 0")
     private int weight;
 
-    @Schema(description = "Описание к заказу (по желанию)")
+    @Schema(description = "Description for ordering (optional)")
     private String description;
 
-    @Schema(description = "Метод оплаты заказа")
+    @Schema(description = "Order payment method")
     @NotNull(message = "Payment method should not be empty")
     @Enumerated(EnumType.STRING)
     private OrderBPM.PaymentMethod paymentMethod;
 
-    @Schema(description = "Статус заказа")
+    @Schema(description = "Order status")
     @Enumerated(EnumType.STRING)
     private OrderBPM.State orderStatus;
 
-    @Schema(description = "Предполагаемая дата доставки заказа")
+    @Schema(description = "Estimated delivery date of the order")
     private LocalDate deliveryDate;
 
-    @Schema(description = "Время создания заказа")
+    @Schema(description = "Order creation time")
     private LocalDateTime creationDate;
 
-    @Schema(description = "Опция 'хрупкий груз'")
+    @Schema(description = "Option 'fragile cargo'")
     @NotNull(message = "Fragile Cargo should not be empty")
     private Boolean fragileCargo;
 
-    @Schema(description = "Цена доставки заказа")
+    @Schema(description = "Order delivery price")
     private double price;
 
 }

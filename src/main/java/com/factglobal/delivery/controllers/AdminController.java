@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admins")
-@Tag(name = "Admin", description = "Методы для работы администратора")
+@Tag(name = "Admin", description = "Methods for the administrator's work")
 public class AdminController {
     private final UserService userService;
     private final CourierService courierService;
@@ -33,25 +33,25 @@ public class AdminController {
     private final CustomerValidator customerValidator;
     private final Mapper mapper;
 
-    @Operation(summary = "Блокировка пользователя по id")
+    @Operation(summary = "Blocking a user by id")
     @PostMapping("/users/{user_id}/block")
     public ResponseEntity<?> blockUser(@PathVariable("user_id") int id) {
         return userService.blockUser(id);
     }
 
-    @Operation(summary = "Разблокировка пользователя по id")
+    @Operation(summary = "Unlocking a user by id")
     @PostMapping("/users/{user_id}/unblock")
     public ResponseEntity<?> unblockUser(@PathVariable("user_id") int id) {
         return userService.unblockUser(id);
     }
 
-    @Operation(summary = "Удаление пользователя по id")
+    @Operation(summary = "Deleting a user by id")
     @DeleteMapping("/{user_id}")
     public ResponseEntity<?> deleteUser(@PathVariable("user_id") int userId) {
         return userService.deleteUser(userId);
     }
 
-    @Operation(summary = "Редактирование пользователя Courier по id")
+    @Operation(summary = "Editing a Courier user by ID")
     @PutMapping("/couriers/{user_id}")
     public ResponseEntity<?> editCourier(@RequestBody @Valid CourierDTO courierDTO,
                                          BindingResult bindingResult,
@@ -64,7 +64,7 @@ public class AdminController {
         return userService.editCourier(courier, userId);
     }
 
-    @Operation(summary = "Редактирование пользователя Customer по id")
+    @Operation(summary = "Editing a Customer user by ID")
     @PutMapping("/customers/{user_id}")
     public ResponseEntity<?> editCustomer(@RequestBody @Valid CustomerDTO customerDTO,
                                           BindingResult bindingResult,
@@ -77,7 +77,7 @@ public class AdminController {
         return userService.editCustomer(customer, userId);
     }
 
-    @Operation(summary = "Получение информации о всех пользователях Courier")
+    @Operation(summary = "Getting information about all Courier users")
     @GetMapping("/couriers")
     public List<CourierDTO> getAllCouriers() {
         return courierService.findAllCouriers().stream()
@@ -85,7 +85,7 @@ public class AdminController {
                 .toList();
     }
 
-    @Operation(summary = "Получение информации о всех пользователях Customer")
+    @Operation(summary = "Getting information about all Customer users")
     @GetMapping("/customers")
     public List<CustomerDTO> getAllCustomers() {
         return customerService.findAllCustomers().stream()

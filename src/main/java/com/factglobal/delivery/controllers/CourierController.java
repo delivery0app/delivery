@@ -21,14 +21,14 @@ import java.security.Principal;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/couriers")
-@Tag(name = "Courier",description = "Методы для работы с пользователем курьером")
+@Tag(name = "Courier",description = "Methods for working with the Courier user")
 public class CourierController {
     private final CourierService courierService;
     private final UserService userService;
     private final CourierValidator courierValidator;
     private final Mapper mapper;
 
-    @Operation(summary = "Получение информации о текущем пользователе Courier")
+    @Operation(summary = "Getting information about the current Courier user")
     @GetMapping
     public CourierDTO getCourier(Principal principal) {
         Courier courier = courierService.findCourierByPhoneNumber(principal.getName());
@@ -36,7 +36,7 @@ public class CourierController {
         return mapper.convertToCourierDTO(courier);
     }
 
-    @Operation(summary = "Редактирование текущего пользователя Courier")
+    @Operation(summary = "Editing the current Courier user")
     @PutMapping
     public ResponseEntity<?> editCourier(@RequestBody @Valid CourierDTO courierDTO,
                                          BindingResult bindingResult,
@@ -53,7 +53,7 @@ public class CourierController {
         return response;
     }
 
-    @Operation(summary = "Удаление текущего пользователя Courier")
+    @Operation(summary = "Deleting the current Courier user")
     @DeleteMapping
     public ResponseEntity<?> deleteCourier(Principal principal) {
         ResponseEntity<?> response = userService.deleteUser(userService.findByPhoneNumber(principal.getName()).orElse(null).getId());
