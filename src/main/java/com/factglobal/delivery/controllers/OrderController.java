@@ -23,14 +23,14 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/orders")
-@Tag(name = "Order", description = "Методы для работы с заказами")
+@Tag(name = "Order", description = "Methods for working with Orders")
 public class OrderController {
     private final OrderService orderService;
     private final CustomerService customerService;
     private final CourierService courierService;
     private final Mapper mapper;
 
-    @Operation(summary = "Получение информации о всех заказах для Admin")
+    @Operation(summary = "Getting information about all orders for Admin")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<OrderDTO> getAllOrders() {
@@ -39,7 +39,7 @@ public class OrderController {
                 .toList();
     }
 
-    @Operation(summary = "Получение информации о заказе для Admin")
+    @Operation(summary = "Getting order information for Admin")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{order_id}")
     public OrderDTO getOrder(@PathVariable("order_id") int orderId) {
@@ -47,7 +47,7 @@ public class OrderController {
         return mapper.convertToOrderDTO(order);
     }
 
-    @Operation(summary = "Создание заказа для текущего пользователя Customer")
+    @Operation(summary = "Creating an order for the current Customer user")
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody @Valid OrderDTO orderDTO,
@@ -59,14 +59,14 @@ public class OrderController {
         return orderService.saveOrder(mapper.convertToOrder(orderDTO), customerId);
     }
 
-    @Operation(summary = "Удаление заказа для Admin")
+    @Operation(summary = "Deleting an order for Admin")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{order_id}")
     public ResponseEntity<?> deleteOrder(@PathVariable("order_id") int orderId) {
         return orderService.deleteOrder(orderId);
     }
 
-    @Operation(summary = "Редактирование заказа для Admin")
+    @Operation(summary = "Editing an order for Admin")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{order_id}/admin")
     public ResponseEntity<?> editOrderByAdmin(@RequestBody @Valid OrderDTO orderDTO,
@@ -79,7 +79,7 @@ public class OrderController {
         return orderService.editOrderByAdmin(newOrder, orderId);
     }
 
-    @Operation(summary = "Редактирование заказа для текущего пользователя Customer")
+    @Operation(summary = "Editing an order for the current Customer user")
     @PreAuthorize("hasRole('CUSTOMER')")
     @PutMapping("/{order_id}")
     public ResponseEntity<?> editOrderByCustomer(@RequestBody @Valid OrderDTO orderDTO,
@@ -91,7 +91,7 @@ public class OrderController {
         return orderService.editOrderByCustomer(mapper.convertToOrder(orderDTO), orderId, principal);
     }
 
-    @Operation(summary = "Получение всех заказов для текущего пользователя Customer")
+    @Operation(summary = "Getting all orders for the current Customer user")
     @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/customers")
     public List<OrderDTO> getOrdersByCustomer(Principal principal) {
@@ -103,7 +103,7 @@ public class OrderController {
                 .toList();
     }
 
-    @Operation(summary = "Получение заказов определенного заказчика для Admin")
+    @Operation(summary = "Getting orders from a specific customer for Admin")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/customers/{customer_id}")
     public List<OrderDTO> getOrdersByCustomerForAdmin(@PathVariable("customer_id") int customerId) {
@@ -112,7 +112,7 @@ public class OrderController {
                 .toList();
     }
 
-    @Operation(summary = "Получение всех заказов определенного курьера для Admin")
+    @Operation(summary = "Getting all orders from a specific courier for Admin")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/couriers/{courier_id}")
     public List<OrderDTO> getOrdersByCourierForAdmin(@PathVariable("courier_id") int courierId) {
@@ -121,7 +121,7 @@ public class OrderController {
                 .toList();
     }
 
-    @Operation(summary = "Получение заказов для текущего пользователя Courier")
+    @Operation(summary = "Getting orders for the current Courier user")
     @PreAuthorize("hasRole('COURIER')")
     @GetMapping("/couriers")
     public List<OrderDTO> getOrdersByCourier(Principal principal) {
@@ -132,14 +132,14 @@ public class OrderController {
                 .toList();
     }
 
-    @Operation(summary = "Отмена заказа для Admin")
+    @Operation(summary = "Cancellation of an order for Admin")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{order_id}/cancel/admin")
     public ResponseEntity<HttpStatus> cancelOrderByAdmin(@PathVariable("order_id") int orderId) {
         return orderService.cancelOrderByAdmin(orderId);
     }
 
-    @Operation(summary = "Отмена заказа для текущего пользователя Customer")
+    @Operation(summary = "Cancellation of an order for the current Customer user")
     @PreAuthorize("hasRole('CUSTOMER')")
     @PutMapping("/{order_id}/cancel")
     public ResponseEntity<?> cancelOrderByCustomer(@PathVariable("order_id") int orderId,
@@ -147,14 +147,14 @@ public class OrderController {
         return orderService.cancelOrderByCustomer(orderId, principal);
     }
 
-    @Operation(summary = "Установка статуса DELIVERED заказу для Admin")
+    @Operation(summary = "Setting the DELIVERED status of an order for the Admin.")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{order_id}/delivered/admin")
     public ResponseEntity<HttpStatus> deliveredOrderByAdmin(@PathVariable("order_id") int orderId) {
         return orderService.deliveredOrder(orderId);
     }
 
-    @Operation(summary = "Установка статуса DELIVERED заказу для текущего пользователя Courier")
+    @Operation(summary = "Setting the DELIVERED status of an order for the current Courier user")
     @PreAuthorize("hasRole('COURIER')")
     @PutMapping("/{order_id}/delivered")
     public ResponseEntity<?> deliveredOrderByCourier(@PathVariable("order_id") int orderId,
@@ -162,7 +162,7 @@ public class OrderController {
         return orderService.deliveredOrder(orderId, principal);
     }
 
-    @Operation(summary = "Назначение курьера на заказ для Admin")
+    @Operation(summary = "Assigning a courier to an order for Admin")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{order_id}/couriers/{courier_id}/assign")
     public ResponseEntity<?> assignCourierForOrderByAdmin(@PathVariable("order_id") int orderId,
@@ -170,7 +170,7 @@ public class OrderController {
         return orderService.assignCourierToOrder(orderId, courierId);
     }
 
-    @Operation(summary = "Назначение курьера на заказ для текущего пользователя Courier")
+    @Operation(summary = "Assigning a courier to an order for the current Courier user")
     @PreAuthorize("hasRole('COURIER')")
     @PutMapping("/{order_id}/couriers/assign")
     public ResponseEntity<?> assignCourierForOrderByCourier(@PathVariable("order_id") int orderId,
@@ -178,7 +178,7 @@ public class OrderController {
         return orderService.assignCourierToOrder(orderId, courierService.findCourierByPhoneNumber(principal.getName()).getId());
     }
 
-    @Operation(summary = "Снятие курьера с заказа для Admin")
+    @Operation(summary = "Removing a courier from an order for the Admin")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("{order_id}/couriers/{courier_id}/release")
     public ResponseEntity<?> releaseCourierFromOrder(@PathVariable("order_id") int orderId,
@@ -187,7 +187,7 @@ public class OrderController {
         return orderService.releaseCourierFromOrder(orderId, courierId);
     }
 
-    @Operation(summary = "Получение заказов по статусу выполнения для Admin")
+    @Operation(summary = "Getting orders by execution status for Admin")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/status")
     public List<OrderDTO> getOrdersByOrderStatus(@RequestParam(value = "status",

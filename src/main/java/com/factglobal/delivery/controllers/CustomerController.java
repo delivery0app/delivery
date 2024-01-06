@@ -22,21 +22,21 @@ import java.security.Principal;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/customers")
-@Tag(name = "Customer", description = "Методы для работы с заказчиком")
+@Tag(name = "Customer", description = "Methods for working with the Customer user")
 public class CustomerController {
     private final CustomerService customerService;
     private final UserService userService;
     private final CustomerValidator customerValidator;
     private final Mapper mapper;
 
-    @Operation(summary = "Получение информации о текущем пользователе Customer")
+    @Operation(summary = "Getting information about the current Customer user")
     @GetMapping
     public CustomerDTO getCustomer(Principal principal) {
         Customer customer = customerService.findCustomerByPhoneNumber(principal.getName());
         return mapper.convertToCustomerDTO(customer);
     }
 
-    @Operation(summary = "Редактирование текущего пользователя Customer")
+    @Operation(summary = "Editing the current Customer user")
     @PutMapping
     public ResponseEntity<?> editCustomer(@RequestBody @Valid CustomerDTO customerDTO,
                                           BindingResult bindingResult,
@@ -53,7 +53,7 @@ public class CustomerController {
         return response;
     }
 
-    @Operation(summary = "Удаление текущего пользователя Customer")
+    @Operation(summary = "Deleting the current Customer user")
     @DeleteMapping
     public ResponseEntity<?> deleteCustomer(Principal principal) {
         ResponseEntity<?> response = userService.deleteUser(userService.findByPhoneNumber(principal.getName()).orElse(null).getId());
