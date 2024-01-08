@@ -12,14 +12,15 @@ This is the backend part of a delivery application, developed in Java and Spring
 - Junit + Mockito
 - Docker
 
-## Includes 6 Java directories
+## Includes 7 Java directories
 - config - security configuration files;
 - controllers - 5 controller classes;
 - dto - a set of objects for data transfer;
 - models - models of User, Role, Courier, Customer, and Order objects;
 - repositories - repositories for models;
-- services - business logic.
-- util - classes for exception handling, validation, order cost calculation, and more.
+- services - business logic;
+- util - classes for exception handling, validation, order cost calculation, and more;
+- tests - unit and integration testing.
   
 ## Deployment
 There are several ways to run a Spring Boot application on your local machine. One way is to execute the docker-compose.yml file from your IDE.
@@ -34,7 +35,7 @@ Another way:
 4. Use username and password as 'admin' to login to demo (see below).
 
 ## About the application
-Application for managing delivery orders of goods from point A to point B. It uses an relational database (PostgreSQL) to store the data. If your database connection properties work, you can call some REST endpoints defined in ```com/factglobal/delivery/controllers``` on **port 8080**. (see below) However, first, you need to authenticate as an Admin, Courier or Customer. 
+Application for managing delivery orders of cargo from point A to point B. It uses an relational database (PostgreSQL) to store the data. If your database connection properties work, you can call some REST endpoints defined in ```com/factglobal/delivery/controllers``` on **port 8080**. (see below) However, first, you need to authenticate as an Admin, Courier or Customer. 
 
 Example:
 ###  Authenticate as an Admin
