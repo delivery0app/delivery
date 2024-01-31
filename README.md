@@ -3,7 +3,7 @@
 This is the backend part of a delivery application, developed in Java and Spring Framework. Our project offers functionality for three roles: Couriers, Customers, and an Admin who can manage the entire process, including orders, couriers, and customers. The application is designed to simplify and optimize delivery processes.
 
 ## Stack
-- Spring Boot v.3.1.4
+- Spring Boot 
 - Spring Data JPA
 - Spring Security + JWT
 - PostgreSQL
